@@ -1,0 +1,36 @@
+{
+  "extends": ["airbnb-base", "airbnb-typescript/base", "prettier", "plugin:prettier/recommended"],
+  "plugins": ["prettier"],
+  "rules": {
+    // prettier rules recommended
+    "prettier/prettier": ["error"],
+    "arrow-body-style": "off",
+    "prefer-arrow-callback": "off",
+    "import/extensions": "off",
+    // other rules
+    "no-throw-literal": "off",
+    "@typescript-eslint/no-throw-literal": "off",
+    "class-methods-use-this": "off",
+    "no-underscore-dangle": "off",
+    "no-param-reassign": "off",
+    "no-await-in-loop": "off",
+    "max-classes-per-file": "off",
+    "import/prefer-default-export": "off",
+    "no-restricted-syntax": "off",
+    "lines-between-class-members": "off",
+    "@typescript-eslint/lines-between-class-members": "off",
+    "consistent-return": "off",
+    "no-plusplus": "off",
+    "prefer-destructuring": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/return-await": "warn",
+    "func-names": "off",
+    "no-promise-executor-return": "off",
+    "no-useless-escape": "off"
+  },
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  // ignore
+  "ignorePatterns": ["dist", "node_modules", "package.json"]
+}

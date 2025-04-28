@@ -1,0 +1,11 @@
+{
+  "API_NOTFOUND": "api endpoint notfound",
+  "INTERNAL_SERVER_ERROR": "INTERNAL SERVER ERROR",
+  "EMAIL_NOT_VALID": "Email is not valid",
+  "UNAUTHORIZE": "UNAUTHORIZE",
+  "INVALID_BODY": "INVALID BODY",
+  "FIELD_REQUIRED": "Field is required",
+  "FIELD_FORMAT": "Field is not correct format",
+  "USER_NOTFOUND": "User is not existed",
+  "EMAIL_IS_EXISTED": "Email: {{email}} is existed"
+}
