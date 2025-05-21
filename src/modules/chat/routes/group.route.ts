@@ -5,6 +5,7 @@ import asyncHandler from '@/middlewares/asyncHandler';
 import { validate } from '@/middlewares/validate.middleware';
 import { creatGroupSchema, updateGroupMemberSchema } from '../validators/group.validator';
 import { GroupController } from '../controllers/group.controller';
+
 const groupRoutes = Router();
 const groupController = new GroupController();
 // Lấy group chat của curUserId

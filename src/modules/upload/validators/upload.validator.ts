@@ -1,4 +1,5 @@
 import * as yup from 'yup';
+
 import { EPostMediaType } from '@/modules/post/model/post.model';
 
 export const removeFileSchema = yup.object({

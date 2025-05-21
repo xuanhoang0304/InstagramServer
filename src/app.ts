@@ -1,20 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import express, { NextFunction, Request, Response } from 'express';
-import { StatusCodes } from 'http-status-codes';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import cors from 'cors';
-import { createServer } from 'http';
-import passport from './middlewares/passport';
-import { logger } from './utils/logger';
 import './config/nodemailer';
+import './cron/otpCleanup';
+
+// import './cron/cloudinaryCleanUp';
+import cors from 'cors';
+import express, { NextFunction, Request, Response } from 'express';
+import helmet from 'helmet';
+import { createServer } from 'http';
+import { StatusCodes } from 'http-status-codes';
+import morgan from 'morgan';
+
+import WebSocketServer from './config/ws';
+import i18nClient from './i18n';
+import passport from './middlewares/passport';
 import modules from './modules';
 import { AppError } from './utils/app-error';
-import i18nClient from './i18n';
-
-import './cron/otpCleanup';
-import WebSocketServer from './config/ws';
+import { logger } from './utils/logger';
 
 const app = express();
 

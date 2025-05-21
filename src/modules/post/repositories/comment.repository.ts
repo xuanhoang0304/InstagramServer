@@ -23,7 +23,8 @@ export class CommentRepository {
       CommentModel.find({ parentCommentId: parentId })
         .sort(sort)
         .skip(paginate.skip)
-        .limit(paginate.limit),
+        .limit(paginate.limit)
+        .populate('createdBy', '_id name avatar website bio followers followings saved isReal'),
       CommentModel.findById(parentId),
     ]);
     const totalReplies = total?.replies.length;
@@ -32,18 +33,32 @@ export class CommentRepository {
       totalReplies,
     };
   }
+  static async getCmtById(id: string) {
+    const result = await CommentModel.findById(id)
+      .populate('createdBy', '_id name avatar website bio followers followings saved isReal')
+      .lean();
+    return result;
+  }
   static async create(data: CreateCommentDTO) {
-    const result = await CommentModel.create({ ...data, post: data.postId, parentCommentId: null });
-    return result.toObject();
+    const newCmt = await CommentModel.create({ ...data, post: data.postId, parentCommentId: null });
+    const result = newCmt.populate(
+      'createdBy',
+      '_id name avatar website bio followers followings saved isReal',
+    );
+    return result;
   }
   static async createReply(data: CreateReplyCommentDTO) {
-    const result = await CommentModel.create({
+    const newCmt = await CommentModel.create({
       ...data,
       post: data.postId,
       parentCommentId: data.parentCommentId,
     });
+    const result = newCmt.populate(
+      'createdBy',
+      '_id name avatar website bio followers followings saved isReal',
+    );
 
-    return result.toObject();
+    return result;
   }
   static async update(commentId: string, data: IComment) {
     const result = await CommentModel.findByIdAndUpdate(

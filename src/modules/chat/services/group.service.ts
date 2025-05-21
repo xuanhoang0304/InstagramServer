@@ -1,11 +1,13 @@
-import { isArray, uniq } from 'lodash';
-import { createGroupDTO, GroupFilters, updateMembersGroupDTO } from '../dtos/group.dtos';
-import { AppError } from '@/utils/app-error';
 import { StatusCodes } from 'http-status-codes';
-import { GroupRepository } from '../repositories/group.repository';
-import { BaseRepository } from '@/utils/baseRepository';
-import { GroupChatModel } from '../model/group.chat.model';
+import { isArray, uniq } from 'lodash';
+
 import { UserService } from '@/modules/account/user/services/user.service';
+import { AppError } from '@/utils/app-error';
+import { BaseRepository } from '@/utils/baseRepository';
+
+import { CreateGroupDTO, GroupFilters, UpdateMembersGroupDTO } from '../dtos/group.dtos';
+import { GroupChatModel } from '../model/group.chat.model';
+import { GroupRepository } from '../repositories/group.repository';
 
 export class GroupService {
   static async getGroups(filters: GroupFilters) {
@@ -21,6 +23,7 @@ export class GroupService {
       });
     }
 
+    const memberName: string[] = [];
     const checkExistMember = async (memberId: string) => {
       const member = await UserService.getById(memberId);
 
@@ -28,21 +31,23 @@ export class GroupService {
         throw new AppError({
           id: 'GroupService.validateMembers',
           statusCode: StatusCodes.BAD_REQUEST,
-          message: 'Người dùng này không tồn tại',
+          message: `Người dùng  không tồn tại`,
         });
       }
+      memberName.push(member.name);
     };
 
     const promises = members.map(checkExistMember);
 
     await Promise.all(promises);
+    return memberName;
   };
-  static async createGroupChat(data: createGroupDTO) {
+  static async createGroupChat(data: CreateGroupDTO) {
     const { members, createdBy, isGroup } = data;
-    await this.validateMembers(members);
+    const memberNames = await this.validateMembers([...members, createdBy]);
+    const groupName = data.groupName || (isGroup ? memberNames.join() : memberNames[0]);
     const memberIds = uniq([...members, createdBy]);
     if (!isGroup) {
-      console.log('private');
       if (memberIds.length !== 2) {
         throw new AppError({
           id: 'GroupService.createGroupChat',
@@ -62,10 +67,10 @@ export class GroupService {
         });
       }
     }
-    const result = await GroupRepository.createGroup({ ...data, members: memberIds });
+    const result = await GroupRepository.createGroup({ ...data, members: memberIds, groupName });
     return result;
   }
-  static async addMembers(curUserId: string, groupId: string, data: updateMembersGroupDTO) {
+  static async addMembers(curUserId: string, groupId: string, data: UpdateMembersGroupDTO) {
     await this.validateMembers(data.members);
     const oldGroup = await BaseRepository.getById(GroupChatModel, groupId);
     if (!oldGroup) {
@@ -94,7 +99,7 @@ export class GroupService {
     const result = await GroupRepository.updateMembers(groupId, newMember);
     return result;
   }
-  static async deleteMembers(curUserId: string, groupId: string, data: updateMembersGroupDTO) {
+  static async deleteMembers(curUserId: string, groupId: string, data: UpdateMembersGroupDTO) {
     await this.validateMembers(data.members);
     const oldGroup = await BaseRepository.getById(GroupChatModel, groupId);
     if (!oldGroup) {
@@ -135,7 +140,7 @@ export class GroupService {
       [...groupMembers].filter((item) => !data.members.includes(item)),
     ) as string[];
     const result = await GroupRepository.updateMembers(groupId, newMember);
-    //Tùy role có cho phép group có 1 người là chủ hay không . Nếu không cho phép thì xóa luôn group
+    // Tùy role có cho phép group có 1 người là chủ hay không . Nếu không cho phép thì xóa luôn group
     // if (newMember.length === 1 && newMember[0] === String(oldGroup.createdBy)) {
     //   const result = await GroupRepository.deleteGroup(groupId);
 

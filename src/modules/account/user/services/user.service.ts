@@ -1,18 +1,23 @@
 import { StatusCodes } from 'http-status-codes';
 
-import { UserRepository } from '../repositories/user.repository';
-import { IUser, UserModel } from '../model/user.model';
-
+import { AuthServices } from '@/modules/account/auth/services/auth.services';
 import { OtpRepository } from '@/modules/account/otp/repositories/otp.repository';
-import { AppError } from '@/utils/app-error';
-import { RegisterSocialUserDTO, RegisterUserDTO, UserFilters } from '../dtos/user.dto';
-import { BaseRepository } from '@/utils/baseRepository';
-import handleHashPassword from '@/utils/handleHashPassword';
 import { PostModel } from '@/modules/post/model/post.model';
 import { PostRepository } from '@/modules/post/repositories/post.repository';
-import { AuthServices } from '@/modules/account/auth/services/auth.services';
+import { AppError } from '@/utils/app-error';
+import { BaseRepository } from '@/utils/baseRepository';
+import handleHashPassword from '@/utils/handleHashPassword';
+
+import { RegisterSocialUserDTO, RegisterUserDTO, UserFilters } from '../dtos/user.dto';
+import { IUser, UserModel } from '../model/user.model';
+import { UserRepository } from '../repositories/user.repository';
 
 export class UserService {
+  static async getPaginate(filter: UserFilters) {
+    console.log(filter);
+    const result = await UserRepository.getFilters(filter);
+    return result;
+  }
   static async getExploreUsers(userId: string, filters: UserFilters) {
     const user = await this.getById(userId);
     if (!user) {

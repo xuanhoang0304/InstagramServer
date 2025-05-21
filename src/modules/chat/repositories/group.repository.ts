@@ -1,5 +1,6 @@
 import { BaseRepository } from '@/utils/baseRepository';
-import { createGroupDTO, GroupFilters } from '../dtos/group.dtos';
+
+import { CreateGroupDTO, GroupFilters } from '../dtos/group.dtos';
 import { GroupChatModel } from '../model/group.chat.model';
 
 export class GroupRepository {
@@ -20,6 +21,7 @@ export class GroupRepository {
   }
   static async getPagination(filters: GroupFilters) {
     const condition = this.getQueries(filters);
+    console.log('con', condition);
     const { sort, paginate } = await BaseRepository.getQuery(filters);
     const [result, totalResult] = await Promise.all([
       GroupChatModel.find(condition)
@@ -44,7 +46,7 @@ export class GroupRepository {
     }).lean();
     return result;
   }
-  static async createGroup(data: createGroupDTO) {
+  static async createGroup(data: CreateGroupDTO) {
     const result = await GroupChatModel.create({
       ...data,
       groupAdmin: data.isGroup ? [data.createdBy] : [],

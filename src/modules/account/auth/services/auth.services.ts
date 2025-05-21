@@ -86,7 +86,6 @@ export class AuthServices {
       ]);
     } else {
       htmlTemplate = '';
-      console.log('Forget');
     }
   }
   static async verifyOtp(otp: string, email: string) {

@@ -29,9 +29,6 @@ class WebSocketServer {
       socket.on('disconnect', () => {
         logger.info(`Client disconnected: ${socket.id}`);
       });
-      socket.on('test', (data) => {
-        console.log('data', data);
-      });
     });
   }
 

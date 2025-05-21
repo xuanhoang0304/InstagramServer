@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export enum EPostMediaType {
   Image = 'image',
@@ -18,6 +18,7 @@ export interface IPost extends Document {
   comments: mongoose.Schema.Types.ObjectId[];
   savedBy: mongoose.Schema.Types.ObjectId[];
   isReel: boolean;
+  pinned: 0 | 1;
 }
 
 const PostSchema = new Schema<IPost>(
@@ -29,6 +30,7 @@ const PostSchema = new Schema<IPost>(
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
     savedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Những ai đã lưu bài
     isReel: { type: Boolean, default: false }, // Phân biệt bài viết và reels
+    pinned: { type: Number, default: 0 },
   },
   { timestamps: true },
 );

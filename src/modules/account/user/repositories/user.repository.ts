@@ -1,5 +1,9 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
+import diacritics from 'diacritics';
 import { Types } from 'mongoose';
+
 import { PostModel } from '@/modules/post/model/post.model';
+
 import { BaseRepository } from '../../../../utils/baseRepository';
 import { RegisterDTO } from '../../auth/dtos/auth.dtos';
 import { UserFilters } from '../dtos/user.dto';
@@ -9,7 +13,8 @@ export class UserRepository {
   static getQuery(filters: UserFilters) {
     const condition: Record<string, any> = {};
     if (filters.keyword) {
-      condition.name = { $regex: new RegExp(filters.keyword, 'i') };
+      const normalizedKeyword = diacritics.remove(filters.keyword).toLowerCase();
+      condition.name_normailized = { $regex: new RegExp(normalizedKeyword, 'i') };
     }
     if (filters.email) {
       condition.email = { $regex: new RegExp(filters.email, 'i') };
@@ -45,7 +50,12 @@ export class UserRepository {
     return UserModel.findOne(Conditions).lean();
   }
   static async create(data: RegisterDTO) {
-    const user = (await UserModel.create(data)).toObject();
+    const user = (
+      await UserModel.create({
+        ...data,
+        name_normailized: diacritics.remove(data.name).toLowerCase(),
+      })
+    ).toObject();
     const { password, ...result } = user;
     return result;
   }
@@ -54,13 +64,17 @@ export class UserRepository {
   }
   static async getFilters(filters: UserFilters) {
     const { condition } = UserRepository.getQuery(filters);
+    console.log('condition', condition);
     const { sort, paginate } = BaseRepository.getQuery(filters);
-    const result = await UserModel.find(condition)
-      .sort(sort)
-      .skip(paginate.skip)
-      .limit(paginate.limit)
-      .select({ password: 0 });
-    return result;
+    const [users, totalUser] = await Promise.all([
+      UserModel.find(condition)
+        .sort(sort)
+        .skip(paginate.skip)
+        .limit(paginate.limit)
+        .select({ password: 0 }),
+      UserModel.find(condition).countDocuments(),
+    ]);
+    return { users, totalUser };
   }
   static async followUser(userId: string, followId: string) {
     const [user] = await Promise.all([

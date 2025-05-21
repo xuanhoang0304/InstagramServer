@@ -54,19 +54,6 @@ export class AuthControllers {
   async RefreshToken(req: Request, res: Response) {
     const refreshToken = req.headers.authorization?.split(' ')[1] as string;
     const result = await AuthServices.RefreshToken(refreshToken);
-    // if (result) {
-    //   res.setHeader(
-    //     'Set-Cookie',
-    //     cookie.serialize('access_token', result, {
-    //       httpOnly: true,
-    //       secure: process.env.NODE_ENV === 'production',
-    //       sameSite: 'strict',
-    //       // maxAge: 60 * 60 * 24,
-    //       maxAge: 15 * 60,
-    //       path: '/',
-    //     }),
-    //   );
-    // }
     res.status(200).json({
       code: 200,
       message: 'Token refreshed successfully',

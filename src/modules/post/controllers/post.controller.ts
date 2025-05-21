@@ -1,24 +1,28 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+
 import { IUser } from '@/modules/account/user/model/user.model';
-import { HttpResponse } from '@/utils/httpResponse';
-import { PostService } from '../services/post.service';
 import { BaseFilters } from '@/utils/baseRepository';
 import { tryParseJson } from '@/utils/helpers';
+import { HttpResponse } from '@/utils/httpResponse';
+
 import { PostFilters } from '../dtos/post.dto';
+import { PostService } from '../services/post.service';
 
 export class PostController {
   async getPagination(req: Request, res: Response) {
-    const { page = 1, limit = 10, sort, order, filters } = req.query;
+    const { page = 1, limit = 10, sort, order, filters, sorts } = req.query;
     const filtersObj = tryParseJson(filters);
-    const Postfilters: PostFilters = {
+    const postFilters: PostFilters = {
       ...filtersObj,
+      sorts,
       page: +page,
       limit: +limit,
       sort: sort as string,
       order: order === 'ASC' ? 'ASC' : 'DESC',
     };
-    const result = await PostService.getPagination(Postfilters);
+
+    const result = await PostService.getPagination(postFilters);
     res.status(StatusCodes.OK).json(result);
   }
   async getPostByPostId(req: Request, res: Response) {

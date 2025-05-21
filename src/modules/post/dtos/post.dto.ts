@@ -1,4 +1,5 @@
 import { BaseFilters } from '@/utils/baseRepository';
+
 import { EPostMediaType } from '../model/post.model';
 
 export interface CreatePostDTO {
@@ -20,4 +21,5 @@ export interface PostFilters extends BaseFilters {
   isReel?: boolean;
   savedBy?: string[];
   excludes?: string[];
+  sorts?: string;
 }

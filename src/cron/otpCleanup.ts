@@ -5,7 +5,6 @@ import { logger } from '@/utils/logger';
 
 cron.schedule('*/10 * * * *', async () => {
   const now = new Date();
-  console.log('now', now);
   try {
     const result = await OtpModel.deleteMany({
       expires: { $lt: now },

@@ -1,26 +1,15 @@
 import { Router } from 'express';
-
 import passport from 'passport';
+
 import asyncHandler from '@/middlewares/asyncHandler';
 import { validate } from '@/middlewares/validate.middleware';
-import { CreatPostSchema, updatePostSchema } from '../validators/post.validator';
+
 import { PostController } from '../controllers/post.controller';
+import { CreatPostSchema, updatePostSchema } from '../validators/post.validator';
 
 const postRoutes = Router();
 const postController = new PostController();
 
-postRoutes.get(
-  '/',
-  passport.authenticate('jwt', { session: false }),
-  asyncHandler(postController.getPagination),
-);
-
-// Lấy Parentcomment của 1 bài post
-postRoutes.get(
-  '/:id/comments',
-  passport.authenticate('jwt', { session: false }),
-  asyncHandler(postController.getCommentsByPostId),
-);
 // Discover Posts
 postRoutes.get(
   '/discover',
@@ -34,12 +23,28 @@ postRoutes.get(
   passport.authenticate('jwt', { session: false }),
   asyncHandler(postController.getPostsByFollowing),
 );
+
+// Lấy Parentcomment của 1 bài post
+postRoutes.get(
+  '/:id/comments',
+  passport.authenticate('jwt', { session: false }),
+  asyncHandler(postController.getCommentsByPostId),
+);
+
 // Lấy bài post theo postId
 postRoutes.get(
   '/:postId',
   passport.authenticate('jwt', { session: false }),
   asyncHandler(postController.getPostByPostId),
 );
+
+// Lấy danh sách posts (route gốc)
+postRoutes.get(
+  '/',
+  passport.authenticate('jwt', { session: false }),
+  asyncHandler(postController.getPagination),
+);
+
 // Tạo 1 bài post
 postRoutes.post(
   '/',
@@ -47,6 +52,7 @@ postRoutes.post(
   validate(CreatPostSchema),
   asyncHandler(postController.create),
 );
+
 // Update bài post
 postRoutes.put(
   '/:postId',
@@ -54,6 +60,7 @@ postRoutes.put(
   validate(updatePostSchema),
   asyncHandler(postController.update),
 );
+
 // Delete bài post
 postRoutes.delete(
   '/:postId',

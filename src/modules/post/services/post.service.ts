@@ -1,13 +1,15 @@
 import { StatusCodes } from 'http-status-codes';
-import { BaseFilters, BaseRepository } from '@/utils/baseRepository';
-import { CreatePostDTO, PostFilters, UpdatePostDTO } from '../dtos/post.dto';
-import { PostRepository } from '../repositories/post.repository';
-import { IPost, PostModel } from '../model/post.model';
-import { AppError } from '@/utils/app-error';
-import { CommentRepository } from '../repositories/comment.repository';
+
 import { UserModel } from '@/modules/account/user/model/user.model';
-import { CommentModel } from '../model/coment.model';
 import { UploadService } from '@/modules/upload/services/upload.service';
+import { AppError } from '@/utils/app-error';
+import { BaseFilters, BaseRepository } from '@/utils/baseRepository';
+
+import { CreatePostDTO, PostFilters, UpdatePostDTO } from '../dtos/post.dto';
+import { CommentModel } from '../model/coment.model';
+import { IPost, PostModel } from '../model/post.model';
+import { CommentRepository } from '../repositories/comment.repository';
+import { PostRepository } from '../repositories/post.repository';
 
 export class PostService {
   static getPagination = async (filters: PostFilters) => {
@@ -28,7 +30,7 @@ export class PostService {
         statusCode: StatusCodes.NOT_FOUND,
       });
     }
-    const following = user.followings.map((item) => String(item));
+    const following = [...user.followings.map((item) => String(item)), id];
     const result = await PostRepository.getDiscoverPosts({
       ...filters,
       excludes,
@@ -46,6 +48,11 @@ export class PostService {
       });
     }
     const following = user.followings.map((item) => String(item));
+    if (!following.length) {
+      return {
+        result: [],
+      };
+    }
     const result = await this.getPagination({ ...filters, createdBy: following });
     return result;
   }

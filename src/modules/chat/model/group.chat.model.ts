@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IGroupChat extends Document {
   members: mongoose.Schema.Types.ObjectId[];
@@ -7,6 +7,7 @@ export interface IGroupChat extends Document {
   groupAvt: string;
   groupAdmin: mongoose.Schema.Types.ObjectId[];
   lastMessage: mongoose.Schema.Types.ObjectId;
+  groupName: string;
 }
 
 const GroupSchema = new Schema<IGroupChat>(
@@ -17,6 +18,7 @@ const GroupSchema = new Schema<IGroupChat>(
     groupAvt: { type: String, default: '' },
     groupAdmin: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     lastMessage: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }],
+    groupName: { type: String, default: '', index: true },
   },
   { timestamps: true },
 );

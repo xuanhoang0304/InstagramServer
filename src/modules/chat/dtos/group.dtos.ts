@@ -1,11 +1,12 @@
 import { BaseFilters } from '@/utils/baseRepository';
 
-export interface createGroupDTO {
+export interface CreateGroupDTO {
   members: string[];
   isGroup: boolean;
   createdBy: string;
+  groupName?: string;
 }
-export interface updateMembersGroupDTO {
+export interface UpdateMembersGroupDTO {
   members: string[];
 }
 export interface GroupFilters extends BaseFilters {

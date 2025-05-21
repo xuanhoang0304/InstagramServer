@@ -50,4 +50,9 @@ export class CommentController {
     const result = await CommentService.delete(commentId, createdBy);
     res.status(StatusCodes.OK).json(HttpResponse.deleted(result));
   }
+  async getCmtById(req: Request, res: Response) {
+    const commentId = req.params.commentId;
+    const result = await CommentService.getCmtById(commentId);
+    res.status(StatusCodes.OK).json(HttpResponse.Paginate(result));
+  }
 }

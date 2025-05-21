@@ -1,13 +1,13 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { AppError } from '@/utils/app-error';
-
-import { HttpResponse } from '@/utils/httpResponse';
+import ConfignEnv from '@/config/env';
 import { EPostMediaType } from '@/modules/post/model/post.model';
+import { AppError } from '@/utils/app-error';
+import { HttpResponse } from '@/utils/httpResponse';
+
 import { RemoveFileDTO } from '../dtos/upload.dto';
 import { UploadService } from '../services/upload.service';
-import ConfignEnv from '@/config/env';
 
 export class UploadController {
   static async uploadImage(request: Request, response: Response) {
@@ -18,6 +18,7 @@ export class UploadController {
         statusCode: StatusCodes.BAD_REQUEST,
       });
     }
+
     if (request.file.size > +ConfignEnv.MAX_SIZE_UPLOAD_IMG * 1024 * 1024) {
       const paths = [request.file.path];
       UploadService.deleteFileByPaths(paths, EPostMediaType.Image);
@@ -31,7 +32,6 @@ export class UploadController {
     response.status(StatusCodes.CREATED).json(HttpResponse.created(data));
   }
   static async uploadVideo(request: Request, response: Response) {
-    console.log('first', request.file);
     if (!request.file?.path) {
       throw new AppError({
         id: 'upload.controller.uploadVideo',

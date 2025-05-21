@@ -1,11 +1,17 @@
 import { Types } from 'mongoose';
+
 import { BaseRepository } from '@/utils/baseRepository';
+
 import { CreatePostDTO, PostFilters, UpdatePostDTO } from '../dtos/post.dto';
 import { PostModel } from '../model/post.model';
 
 export class PostRepository {
   static getQueries(filter: PostFilters) {
     const conditions: Record<string, any> = {};
+    let sorts: Record<string, number> = {};
+    if (filter?.sorts) {
+      sorts = JSON.parse(filter.sorts);
+    }
     if (filter?.createdBy?.length) {
       conditions.createdBy = {
         $in: filter.createdBy.map((item: string) => new Types.ObjectId(item)),
@@ -19,28 +25,37 @@ export class PostRepository {
     if (filter?.excludes?.length) {
       conditions._id = { $nin: filter.excludes.map((item: string) => new Types.ObjectId(item)) };
     }
+    if (filter?.isReel) {
+      conditions.isReel = filter.isReel;
+    }
 
-    return conditions;
+    return { conditions, sorts };
   }
   static async getPagination(filters: PostFilters) {
-    const condition = PostRepository.getQueries(filters);
+    const { conditions, sorts } = PostRepository.getQueries(filters);
     const { sort, paginate } = await BaseRepository.getQuery(filters);
+    let finalSort = { ...sort };
+    if (Object.keys(sorts).length > 0) {
+      finalSort = { ...sorts };
+    }
+    console.log('conditions', conditions);
     const [result, total] = await Promise.all([
-      PostModel.find(condition)
-        .sort(sort)
+      PostModel.find(conditions)
+        .sort(finalSort)
         .limit(paginate.limit)
         .skip(paginate.skip)
         .populate('createdBy', '_id name avatar website bio followers followings saved isReal'),
-      PostModel.find(condition).countDocuments(),
+      PostModel.find(conditions).countDocuments(),
     ]);
 
     return { result, total };
   }
   static async getDiscoverPosts(filters: PostFilters) {
-    const condition = await PostRepository.getQueries(filters);
+    const { conditions } = await PostRepository.getQueries(filters);
+
     const [result, total] = await Promise.all([
       PostModel.aggregate([
-        { $match: condition },
+        { $match: conditions },
         { $sample: { size: Number(filters.limit) } },
         {
           $lookup: {
@@ -83,9 +98,8 @@ export class PostRepository {
         },
         { $sort: { borough: -1 } },
       ]),
-      PostModel.find(condition).countDocuments(),
+      PostModel.find(conditions).countDocuments(),
     ]);
-
     return { result, total };
   }
   static async getById(id: string) {

@@ -12,6 +12,10 @@ export class CommentService {
     const result = await CommentRepository.getRepliesByParentCommentId(parentCommentId, filters);
     return result;
   }
+  static async getCmtById(cmtId: string) {
+    const result = await CommentRepository.getCmtById(cmtId);
+    return result;
+  }
   static async create(data: CreateCommentDTO) {
     const post = await BaseRepository.getByField(PostModel, '_id', data.postId);
     if (!post) {

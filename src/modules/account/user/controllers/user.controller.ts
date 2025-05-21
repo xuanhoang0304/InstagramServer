@@ -1,12 +1,33 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { UserService } from '../services/user.service';
+
+import { UserFilters } from '@/modules/account/user/dtos/user.dto';
+import { tryParseJson } from '@/utils/helpers';
+
 import { HttpResponse } from '../../../../utils/httpResponse';
 import { IUser } from '../model/user.model';
-import { tryParseJson } from '@/utils/helpers';
-import { UserFilters } from '@/modules/account/user/dtos/user.dto';
+import { UserService } from '../services/user.service';
 
 export class UserController {
+  async getPaginate(req: Request, res: Response) {
+    const { page = 1, limit = 10, sort, order, filters } = req.query;
+    const filtersObj = tryParseJson(filters);
+    const Usertfilters: UserFilters = {
+      ...filtersObj,
+      page: +page,
+      limit: +limit,
+      sort: sort as string,
+      order: order === 'ASC' ? 'ASC' : 'DESC',
+    };
+    const result = await UserService.getPaginate(Usertfilters);
+    res.status(StatusCodes.OK).json(HttpResponse.Paginate(result));
+  }
+
+  async getUserById(req: Request, res: Response) {
+    const userId = req.params.id;
+    const result = await UserService.getById(userId);
+    res.status(StatusCodes.OK).json(HttpResponse.Paginate(result));
+  }
   async getExploreUsers(req: Request, res: Response) {
     const user = req.user as IUser;
     const userId = String(user._id);

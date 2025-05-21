@@ -12,6 +12,12 @@ import { CommentController } from '../controllers/comment.controller';
 
 const CommentRoutes = Router();
 const commentController = new CommentController();
+// Get comment by Id
+CommentRoutes.get(
+  '/:commentId/',
+  passport.authenticate('jwt', { session: false }),
+  asyncHandler(commentController.getCmtById),
+);
 // get Replies by ParentCommentId
 CommentRoutes.get(
   '/:commentId/replies',

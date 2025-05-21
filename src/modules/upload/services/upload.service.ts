@@ -1,5 +1,6 @@
-import { extractPublicId } from 'cloudinary-build-url';
 import { v2 as cloudinary } from 'cloudinary';
+import { extractPublicId } from 'cloudinary-build-url';
+
 import ConfignEnv from '@/config/env';
 import { EPostMediaType } from '@/modules/post/model/post.model';
 

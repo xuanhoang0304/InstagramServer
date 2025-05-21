@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export enum EUserGender {
   Male = 'male',
@@ -13,6 +13,7 @@ export enum EAuthProvider {
 
 export interface IUser extends Document {
   name: string;
+  name_normailized: string;
   username: string;
   email: string;
   phoneNumber: string;
@@ -31,6 +32,7 @@ export interface IUser extends Document {
 const UserSchema = new Schema<IUser>(
   {
     name: { type: String, required: true, unique: true },
+    name_normailized: { type: String, required: true, index: true },
     email: { type: String, required: true, unique: true },
     password: {
       type: String,
