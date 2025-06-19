@@ -17,7 +17,7 @@ const GroupSchema = new Schema<IGroupChat>(
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     groupAvt: { type: String, default: '' },
     groupAdmin: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    lastMessage: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }],
+    lastMessage: { type: mongoose.Schema.Types.ObjectId, ref: 'Message', default: null },
     groupName: { type: String, default: '', index: true },
   },
   { timestamps: true },

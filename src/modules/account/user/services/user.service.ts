@@ -14,7 +14,6 @@ import { UserRepository } from '../repositories/user.repository';
 
 export class UserService {
   static async getPaginate(filter: UserFilters) {
-    console.log(filter);
     const result = await UserRepository.getFilters(filter);
     return result;
   }

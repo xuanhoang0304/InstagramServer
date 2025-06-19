@@ -1,6 +1,8 @@
+import { Types } from 'mongoose';
+
 import { BaseRepository } from '@/utils/baseRepository';
 
-import { CreateGroupDTO, GroupFilters } from '../dtos/group.dtos';
+import { CreateGroupDTO, GroupFilters, UpdateGroup } from '../dtos/group.dtos';
 import { GroupChatModel } from '../model/group.chat.model';
 
 export class GroupRepository {
@@ -12,16 +14,16 @@ export class GroupRepository {
     if (filters.userId) {
       conditions.$or = [
         {
-          createdBy: filters.userId,
+          createdBy: new Types.ObjectId(filters.userId),
+          lastMessage: { $ne: null },
         },
-        { members: { $in: [filters.userId] } },
+        { members: { $in: [new Types.ObjectId(filters.userId)] }, lastMessage: { $ne: null } },
       ];
     }
     return conditions;
   }
   static async getPagination(filters: GroupFilters) {
     const condition = this.getQueries(filters);
-    console.log('con', condition);
     const { sort, paginate } = await BaseRepository.getQuery(filters);
     const [result, totalResult] = await Promise.all([
       GroupChatModel.find(condition)
@@ -38,6 +40,14 @@ export class GroupRepository {
       totalResult,
     };
   }
+  static async getById(id: string) {
+    const result = await GroupChatModel.findById(new Types.ObjectId(id))
+      .populate('members', 'username email name avatar')
+      .populate('createdBy', 'username email name avatar')
+      .lean();
+    return result;
+  }
+
   static async checkExistedGroupWithAllMembers(members: string[], isGroup: boolean) {
     const sortedMembers = members.sort();
     const result = await GroupChatModel.findOne({
@@ -50,6 +60,7 @@ export class GroupRepository {
     const result = await GroupChatModel.create({
       ...data,
       groupAdmin: data.isGroup ? [data.createdBy] : [],
+      lastMessage: data.isGroup ? '680b20896a98cf92714035f6' : null,
     });
     return result;
   }
@@ -71,5 +82,9 @@ export class GroupRepository {
         groupAdmin: userId,
       },
     });
+  }
+  static async updateGroup(data: UpdateGroup, id: string) {
+    const result = await GroupChatModel.findByIdAndUpdate(id, data, { new: true });
+    return result;
   }
 }

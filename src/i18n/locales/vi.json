@@ -47,5 +47,16 @@
   "refreshToken must be exactly 24 characters": "refreshToken must be exactly 24 characters",
   "refreshToken must be exactly 32 characters": "refreshToken must be exactly 32 characters",
   "media[0].path must be a `string` type, but the final value was: `{\n  \"type\": \"\\\"image\\\"\",\n  \"path\": \"\\\"https://res.cloudinary.com/dt4ujubla/image/upload/v1747487776/instagram-image/u1mqq1kua3lelmunsrzm.jpg\\\"\"\n}`.": "media[0].path must be a `string` type, but the final value was: `{\n  \"type\": \"\\\"image\\\"\",\n  \"path\": \"\\\"https://res.cloudinary.com/dt4ujubla/image/upload/v1747487776/instagram-image/u1mqq1kua3lelmunsrzm.jpg\\\"\"\n}`.",
-  "media[1].path must be a `string` type, but the final value was: `{\n  \"type\": \"\\\"image\\\"\",\n  \"path\": \"\\\"https://res.cloudinary.com/dt4ujubla/image/upload/v1747487778/instagram-image/dhb1jvnuk6n1n90ef3e4.jpg\\\"\"\n}`.": "media[1].path must be a `string` type, but the final value was: `{\n  \"type\": \"\\\"image\\\"\",\n  \"path\": \"\\\"https://res.cloudinary.com/dt4ujubla/image/upload/v1747487778/instagram-image/dhb1jvnuk6n1n90ef3e4.jpg\\\"\"\n}`."
+  "media[1].path must be a `string` type, but the final value was: `{\n  \"type\": \"\\\"image\\\"\",\n  \"path\": \"\\\"https://res.cloudinary.com/dt4ujubla/image/upload/v1747487778/instagram-image/dhb1jvnuk6n1n90ef3e4.jpg\\\"\"\n}`.": "media[1].path must be a `string` type, but the final value was: `{\n  \"type\": \"\\\"image\\\"\",\n  \"path\": \"\\\"https://res.cloudinary.com/dt4ujubla/image/upload/v1747487778/instagram-image/dhb1jvnuk6n1n90ef3e4.jpg\\\"\"\n}`.",
+  "Group is not existed": "Group is not existed",
+  "groupId is a required field": "groupId is a required field",
+  "Tin nhắn không hợp lệ": "Tin nhắn không hợp lệ",
+  "Group chat không tồn tại": "Group chat không tồn tại",
+  "text is a required field": "text is a required field",
+  "paths[0] must be a `object` type, but the final value was: `\"https://res.cloudinary.com/dt4ujubla/image/upload/v1744399528/anh01_jfhh1i.jpg\"`.": "paths[0] must be a `object` type, but the final value was: `\"https://res.cloudinary.com/dt4ujubla/image/upload/v1744399528/anh01_jfhh1i.jpg\"`.",
+  "paths[1] must be a `object` type, but the final value was: `\"https://res.cloudinary.com/dt4ujubla/image/upload/v1744399543/anh01_zm1jiq.jpg\"`.": "paths[1] must be a `object` type, but the final value was: `\"https://res.cloudinary.com/dt4ujubla/image/upload/v1744399543/anh01_zm1jiq.jpg\"`.",
+  "Message is not existed": "Message is not existed",
+  "User is not a member in group": "User is not a member in group",
+  "lastMessage cannot be null": "lastMessage cannot be null",
+  "Token invalid or expried": "Token invalid or expried"
 }

@@ -3,7 +3,7 @@ import initMongoDb from './config/database';
 import ConfignEnv from './config/env';
 import { logger } from './utils/logger';
 
-const PORT = ConfignEnv.port;
+const PORT = ConfignEnv.PORT;
 
 const startServer = async () => {
   await initMongoDb(); // Kết nối MongoDB

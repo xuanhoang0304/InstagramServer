@@ -1,15 +1,16 @@
-import { logger } from '@/utils/logger';
-import { PermissionModel } from '../model/permission.model';
-import { PermissionSeeding } from '@/seeding/permission';
 import ConfignEnv from '@/config/env';
-import { RoleSeeding } from '@/seeding/role';
-import { RoleModel } from '../model/role.model';
 import { AdminSeeding } from '@/seeding/admin';
+import { PermissionSeeding } from '@/seeding/permission';
+import { RoleSeeding } from '@/seeding/role';
+import { logger } from '@/utils/logger';
+
 import { AdminModel } from '../model/admin.model';
+import { PermissionModel } from '../model/permission.model';
+import { RoleModel } from '../model/role.model';
 
 export class RoleRepository {
   static async seedingDB() {
-    if (ConfignEnv.seedingPermission) {
+    if (ConfignEnv.SEEDING_PERMISSION) {
       const promises: Promise<any>[] = [];
       PermissionSeeding.forEach((item) => {
         promises.push(

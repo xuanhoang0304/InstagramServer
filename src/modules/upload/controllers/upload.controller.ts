@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import ConfignEnv from '@/config/env';
-import { EPostMediaType } from '@/modules/post/model/post.model';
+import { EPostMediaType, IPostMedia } from '@/modules/post/model/post.model';
 import { AppError } from '@/utils/app-error';
 import { HttpResponse } from '@/utils/httpResponse';
 
@@ -20,8 +20,8 @@ export class UploadController {
     }
 
     if (request.file.size > +ConfignEnv.MAX_SIZE_UPLOAD_IMG * 1024 * 1024) {
-      const paths = [request.file.path];
-      UploadService.deleteFileByPaths(paths, EPostMediaType.Image);
+      const paths: IPostMedia[] = [{ path: request.file.path, type: EPostMediaType.Image }];
+      UploadService.deleteFileByPaths(paths);
       throw new AppError({
         id: 'upload.controller.uploadImage',
         message: 'Ảnh vượt quá kích thước cho phép',
@@ -41,8 +41,8 @@ export class UploadController {
     }
 
     if (request.file.size > +ConfignEnv.MAX_SIZE_UPLOAD_VIDEO * 1024 * 1024) {
-      const paths = [request.file.path];
-      UploadService.deleteFileByPaths(paths, EPostMediaType.Video);
+      const paths: IPostMedia[] = [{ path: request.file.path, type: EPostMediaType.Video }];
+      UploadService.deleteFileByPaths(paths);
       throw new AppError({
         id: 'upload.controller.uploadVideo',
         message: 'Video vượt quá kích thước cho phép',
@@ -53,11 +53,10 @@ export class UploadController {
     response.status(StatusCodes.CREATED).json(HttpResponse.created(data));
   }
   static async removeFile(request: Request, response: Response) {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { paths, resource_type } = request.body as RemoveFileDTO;
+    const { paths } = request.body as RemoveFileDTO;
 
-    await UploadService.deleteFileByPaths(paths, resource_type);
+    await UploadService.deleteFileByPaths(paths);
 
-    response.status(StatusCodes.OK).json(HttpResponse.deleted({ data: paths }));
+    response.status(StatusCodes.OK).json(HttpResponse.deleted(paths));
   }
 }

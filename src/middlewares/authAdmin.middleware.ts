@@ -1,10 +1,11 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { AppError } from '@/utils/app-error';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+
 import ConfignEnv from '@/config/env';
 import { EPermissions } from '@/modules/account/user/model/permission.model';
 import { RoleService } from '@/modules/account/user/services/role.service';
+import { AppError } from '@/utils/app-error';
 
 export const authAdminMiddleware = (req: Request, _res: Response, next: NextFunction) => {
   try {
@@ -17,7 +18,7 @@ export const authAdminMiddleware = (req: Request, _res: Response, next: NextFunc
         message: 'UNAUTHORIZE',
       });
     }
-    const decoded = jwt.verify(token, ConfignEnv.jwt_admin_secret) as JwtPayload & { id: string };
+    const decoded = jwt.verify(token, ConfignEnv.JWT_ADMIN_SECRET) as JwtPayload & { id: string };
     if (!decoded?.id) {
       throw new AppError({
         id: 'authAdmin.middleware.decoded',

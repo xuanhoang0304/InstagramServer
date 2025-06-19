@@ -28,6 +28,9 @@ export class UserRepository {
       const filtersArr = [...excludes, ...follow].map((id) => new Types.ObjectId(id));
       condition._id = { $nin: filtersArr };
     }
+    if (filters.excludes && filters.excludes.length) {
+      condition._id = { $nin: filters.excludes };
+    }
     return { condition };
   }
   static async getExploreUsers(filters: UserFilters) {
@@ -64,7 +67,6 @@ export class UserRepository {
   }
   static async getFilters(filters: UserFilters) {
     const { condition } = UserRepository.getQuery(filters);
-    console.log('condition', condition);
     const { sort, paginate } = BaseRepository.getQuery(filters);
     const [users, totalUser] = await Promise.all([
       UserModel.find(condition)

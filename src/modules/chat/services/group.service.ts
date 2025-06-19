@@ -5,13 +5,29 @@ import { UserService } from '@/modules/account/user/services/user.service';
 import { AppError } from '@/utils/app-error';
 import { BaseRepository } from '@/utils/baseRepository';
 
-import { CreateGroupDTO, GroupFilters, UpdateMembersGroupDTO } from '../dtos/group.dtos';
-import { GroupChatModel } from '../model/group.chat.model';
+import {
+  CreateGroupDTO,
+  GroupFilters,
+  UpdateGroup,
+  UpdateMembersGroupDTO,
+} from '../dtos/group.dtos';
+import { GroupChatModel, IGroupChat } from '../model/group.chat.model';
 import { GroupRepository } from '../repositories/group.repository';
 
 export class GroupService {
   static async getGroups(filters: GroupFilters) {
-    const result = await GroupRepository.getPagination(filters);
+    const data = await GroupRepository.getPagination(filters);
+    return data;
+  }
+  static async getById(id: string) {
+    const result = (await GroupRepository.getById(id)) as IGroupChat;
+    if (!result) {
+      throw new AppError({
+        id: 'GroupService.getById',
+        message: 'Group is not existed',
+        statusCode: StatusCodes.NOT_FOUND,
+      });
+    }
     return result;
   }
   static validateMembers = async (members: string[]) => {
@@ -24,6 +40,7 @@ export class GroupService {
     }
 
     const memberName: string[] = [];
+
     const checkExistMember = async (memberId: string) => {
       const member = await UserService.getById(memberId);
 
@@ -40,12 +57,13 @@ export class GroupService {
     const promises = members.map(checkExistMember);
 
     await Promise.all(promises);
-    return memberName;
+    return { memberName };
   };
   static async createGroupChat(data: CreateGroupDTO) {
     const { members, createdBy, isGroup } = data;
-    const memberNames = await this.validateMembers([...members, createdBy]);
-    const groupName = data.groupName || (isGroup ? memberNames.join() : memberNames[0]);
+    const { memberName } = await this.validateMembers([...members, createdBy]);
+    const groupName = data.groupName || (isGroup ? memberName.join() : '');
+
     const memberIds = uniq([...members, createdBy]);
     if (!isGroup) {
       if (memberIds.length !== 2) {
@@ -64,10 +82,16 @@ export class GroupService {
           id: 'GroupService.createGroupChat',
           statusCode: StatusCodes.BAD_REQUEST,
           message: 'Group chat is existed',
+          detail: `${existedGroupPrivate._id}`,
         });
       }
     }
-    const result = await GroupRepository.createGroup({ ...data, members: memberIds, groupName });
+
+    const result = await GroupRepository.createGroup({
+      ...data,
+      members: memberIds,
+      groupName,
+    });
     return result;
   }
   static async addMembers(curUserId: string, groupId: string, data: UpdateMembersGroupDTO) {
@@ -175,6 +199,27 @@ export class GroupService {
     // ......
     // Delete group
     const result = await GroupRepository.deleteGroup(groupId);
+    return result;
+  }
+  static async updateGroup(groupId: string, data: UpdateGroup, curUserId: string) {
+    const group = await BaseRepository.getById(GroupChatModel, groupId);
+    if (!group) {
+      throw new AppError({
+        id: 'GroupService.UpdateGroup',
+        message: 'Group is not existed',
+        statusCode: StatusCodes.NOT_FOUND,
+      });
+    }
+
+    const userInGroup = group.members.find((member) => String(member) === curUserId);
+    if (!userInGroup) {
+      throw new AppError({
+        id: 'GroupService.UpdateGroup',
+        message: 'User is not a member in group',
+        statusCode: StatusCodes.NOT_FOUND,
+      });
+    }
+    const result = await GroupRepository.updateGroup(data, groupId);
     return result;
   }
 }

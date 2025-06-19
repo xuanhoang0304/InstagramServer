@@ -1,13 +1,15 @@
+import * as cookie from 'cookie';
 import { Router } from 'express';
 import passport from 'passport';
-import * as cookie from 'cookie';
-import { AuthControllers } from '../controllers/auth.controllers';
-import { validate } from '@/middlewares/validate.middleware';
+
 import asyncHandler from '@/middlewares/asyncHandler';
-import { VerifyOtpSchema, otpSchema } from '@/modules/account/otp/validator/otp.validator';
-import { AuthServices } from '../services/auth.services';
-import { IUser } from '../../user/model/user.model';
+import { validate } from '@/middlewares/validate.middleware';
 import { LoginSchema } from '@/modules/account/auth/validators/auth.validators';
+import { otpSchema, VerifyOtpSchema } from '@/modules/account/otp/validator/otp.validator';
+
+import { IUser } from '../../user/model/user.model';
+import { AuthControllers } from '../controllers/auth.controllers';
+import { AuthServices } from '../services/auth.services';
 
 const AuthRoutes = Router();
 const AuthController = new AuthControllers();
@@ -38,10 +40,19 @@ AuthRoutes.get(
     if (refreshToken) {
       cookies.push(
         cookie.serialize('refreshToken', String(refreshToken), {
-          httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'strict',
           maxAge: 60 * 60 * 24 * 7,
+          path: '/',
+        }),
+      );
+    }
+    if (token) {
+      cookies.push(
+        cookie.serialize('accessToken', String(token), {
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 60 * 15,
           path: '/',
         }),
       );
@@ -53,5 +64,11 @@ AuthRoutes.get(
       `http://localhost:3000/auth/google-callback?token=${token}&refreshToken=${refreshToken}`,
     );
   },
+);
+AuthRoutes.post('/check-token', asyncHandler(AuthController.checkToken));
+AuthRoutes.post(
+  '/logout',
+  passport.authenticate('jwt', { session: false }),
+  asyncHandler(AuthController.Logout),
 );
 export default AuthRoutes;

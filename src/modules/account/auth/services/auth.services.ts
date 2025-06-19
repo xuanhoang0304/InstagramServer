@@ -1,28 +1,32 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { StatusCodes } from 'http-status-codes';
-import ConfignEnv from '../../../../config/env';
-import { IUser, UserModel } from '../../user/model/user.model';
-import { LoginDTO } from '../dtos/auth.dtos';
-import { OtpRepository } from '../../otp/repositories/otp.repository';
-import SendMail from '../../../../config/nodemailer';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+
+import { RedisDB } from '@/config/redis';
+import { UserService } from '@/modules/account/user/services/user.service';
+import { StringValue } from '@/types/types';
 import { AppError } from '@/utils/app-error';
-import { IAdmin } from '../../user/model/admin.model';
-import { ETypeOTP } from '../../otp/models/otp.model';
-import { UserRepository } from '../../user/repositories/user.repository';
 import { BaseRepository } from '@/utils/baseRepository';
 import { generateOTP } from '@/utils/helpers';
-import { StringValue } from '@/types/types';
-import { UserService } from '@/modules/account/user/services/user.service';
+import { logger } from '@/utils/logger';
+
+import ConfignEnv from '../../../../config/env';
+import SendMail from '../../../../config/nodemailer';
+import { ETypeOTP } from '../../otp/models/otp.model';
+import { OtpRepository } from '../../otp/repositories/otp.repository';
+import { IAdmin } from '../../user/model/admin.model';
+import { IUser, UserModel } from '../../user/model/user.model';
+import { UserRepository } from '../../user/repositories/user.repository';
+import { LoginDTO } from '../dtos/auth.dtos';
 
 export class AuthServices {
   static signJWT(data: Partial<IUser>, expiresIn: StringValue | number) {
-    return jwt.sign({ id: data._id }, ConfignEnv.jwt_secret, {
+    return jwt.sign({ id: data._id }, ConfignEnv.JWT_SECRET, {
       expiresIn,
     });
   }
   static signADminJWT(data: Partial<IAdmin>) {
-    return jwt.sign({ id: data._id }, ConfignEnv.jwt_admin_secret, {
+    return jwt.sign({ id: data._id }, ConfignEnv.JWT_ADMIN_SECRET, {
       expiresIn: '1d',
     });
   }
@@ -53,10 +57,7 @@ export class AuthServices {
         params: { email },
       });
     }
-    // const otp = otpGenerator.generate(6, {
-    //   upperCaseAlphabets: false,
-    //   specialChars: false,
-    // });
+
     const otp = generateOTP(6);
 
     let htmlTemplate = `<h1>Xác thực OTP</h1><p>Mã OTP của bạn là: <b>{{otp}}</b></p>`;
@@ -117,7 +118,7 @@ export class AuthServices {
         message: 'USER_NOTFOUND',
       });
     }
-    const accessToken = this.signJWT(existedgUser, '15m');
+    const accessToken = this.signJWT(existedgUser, '15s');
     const refreshToken = this.signJWT(existedgUser, '7d');
     const result = {
       accessToken,
@@ -129,7 +130,7 @@ export class AuthServices {
   }
   static async RefreshToken(refreshToken: string) {
     const now = Math.floor(Date.now() / 1000);
-    const decodedRefreshToken = jwt.verify(refreshToken, ConfignEnv.jwt_secret) as JwtPayload & {
+    const decodedRefreshToken = jwt.verify(refreshToken, ConfignEnv.JWT_SECRET) as JwtPayload & {
       id: string;
     };
     const existedgUser = await UserService.getById(decodedRefreshToken.id);
@@ -149,5 +150,45 @@ export class AuthServices {
     }
     const accessToken = this.signJWT(existedgUser, '15m');
     return accessToken;
+  }
+
+  static async checkToken(token: string) {
+    const redis = new RedisDB();
+    const inBlacklist = await redis.getKey(`blacklist:${token}`);
+    redis.disconnect();
+    if (inBlacklist) {
+      throw new AppError({
+        id: 'AuthServices.checkToken',
+        message: 'Token invalid or expried',
+        statusCode: StatusCodes.BAD_REQUEST,
+      });
+    }
+    const decoded = jwt.verify(token, ConfignEnv.JWT_SECRET) as JwtPayload & {
+      id: string;
+    };
+    if (decoded.id) {
+      return decoded.id;
+    }
+    return null;
+  }
+
+  static async Logout(token: string) {
+    const redis = new RedisDB();
+    const decoded = jwt.verify(token, ConfignEnv.JWT_SECRET) as JwtPayload;
+    const expirationTime = decoded.exp as number;
+    const currentTime = Math.floor(Date.now() / 1000);
+    const timeToLive = expirationTime - currentTime;
+    await redis.setKey(`blacklist:${token}`, token, {
+      expiration: {
+        type: 'EX',
+        value: timeToLive,
+      },
+    });
+    redis.disconnect();
+    logger.info(`Token ${token} đã được thêm vào blacklist với TTL ${timeToLive} giây`);
+    return {
+      accessToken: '',
+      refreshToken: '',
+    };
   }
 }

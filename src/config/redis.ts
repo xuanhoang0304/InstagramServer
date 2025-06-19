@@ -13,7 +13,9 @@ export class RedisDB {
   public async ConnectRedis() {
     if (!this.client) {
       this.client = await createClient() // Kết nối Redis
-        .on('error', (err) => logger.error('Redis Client Error', err))
+        .on('error', (err) => {
+          logger.error('Redis Client Error', err);
+        })
         .connect();
     }
     return this.client;
@@ -41,5 +43,8 @@ export class RedisDB {
   public async deleteKey(key: RedisArgument) {
     const client = await this.ConnectRedis();
     return client.del(key);
+  }
+  public async disconnect() {
+    return this.client.destroy();
   }
 }

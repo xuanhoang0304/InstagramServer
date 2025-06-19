@@ -1,14 +1,12 @@
 import { Router } from 'express';
-
 import passport from 'passport';
-
-import { UploadController } from '../controllers/upload.controller';
 
 import { UploadImageClient, UploadVideoClient } from '@/config/cloudinary';
 import asyncHandler from '@/middlewares/asyncHandler';
-
-import { removeFileSchema } from '../validators/upload.validator';
 import { validate } from '@/middlewares/validate.middleware';
+
+import { UploadController } from '../controllers/upload.controller';
+import { removeFileSchema2 } from '../validators/upload.validator';
 
 const router = Router();
 
@@ -28,7 +26,7 @@ router.post(
 router.delete(
   '/by-paths',
   passport.authenticate('jwt', { session: false }),
-  validate(removeFileSchema),
+  validate(removeFileSchema2),
   UploadController.removeFile,
 );
 

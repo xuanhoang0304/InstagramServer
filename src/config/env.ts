@@ -3,13 +3,16 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const ConfignEnv = {
-  port: process.env.PORT || '',
-  mongo_uri: process.env.MONGO_URI || '',
-  jwt_secret: process.env.JWT_SECRET || '',
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  PORT: process.env.PORT || '',
+  MONGO_URI: process.env.MONGO_URI || '',
+  MONGO_USERNAME: process.env.MONGO_USERNAME,
+  MONGO_PASSWORD: process.env.MONGO_PASSWORD,
+  JWT_SECRET: process.env.JWT_SECRET || '',
   GG_CLIENT_ID: process.env.GG_CLIENT_ID || '',
   GG_SECRET_ID: process.env.GG_CLIENT_ID || '',
-  seedingPermission: process.env.SEEDING_PERMISSION || true,
-  jwt_admin_secret: process.env.JWT_ADMIN_SECRET || '',
+  SEEDING_PERMISSION: process.env.SEEDING_PERMISSION || true,
+  JWT_ADMIN_SECRET: process.env.JWT_ADMIN_SECRET || '',
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME || '',
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY || '',
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || '',
