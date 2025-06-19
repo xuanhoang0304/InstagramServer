@@ -1,6 +1,6 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { createClient, RedisArgument, SetOptions } from 'redis';
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { logger } from '@/utils/logger';
 
 export class RedisDB {
@@ -12,7 +12,17 @@ export class RedisDB {
 
   public async ConnectRedis() {
     if (!this.client) {
-      this.client = await createClient() // Kết nối Redis
+      this.client = await createClient({
+        socket: {
+          reconnectStrategy: (retries) => {
+            logger.info(`Reconnecting attempt ${retries}`);
+            return Math.min(retries * 100, 3000);
+          },
+          connectTimeout: 10000,
+          keepAlive: true,
+        },
+        pingInterval: 3000,
+      }) // Kết nối Redis
         .on('error', (err) => {
           logger.error('Redis Client Error', err);
         })

@@ -1,3 +1,5 @@
+import { CustomCookies } from '@/types/types';
+
 export const tryParseJson = (str: any) => {
   try {
     return JSON.parse(str);
@@ -26,4 +28,12 @@ export function generateOTP(length: number): string {
     otp += digits[Math.floor(Math.random() * digits.length)];
   }
   return otp;
+}
+export function tryParseCookie(cookieHeader: string): CustomCookies {
+  const cookies: CustomCookies = {};
+  cookieHeader?.split(';').forEach((item) => {
+    const [key, value] = item.trim().split('=');
+    cookies[key as keyof CustomCookies] = value;
+  });
+  return cookies;
 }

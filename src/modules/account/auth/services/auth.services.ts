@@ -118,7 +118,7 @@ export class AuthServices {
         message: 'USER_NOTFOUND',
       });
     }
-    const accessToken = this.signJWT(existedgUser, '15s');
+    const accessToken = this.signJWT(existedgUser, '15m');
     const refreshToken = this.signJWT(existedgUser, '7d');
     const result = {
       accessToken,

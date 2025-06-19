@@ -1,16 +1,32 @@
 import * as cookie from 'cookie';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+
+import ConfignEnv from '@/config/env';
+import { CustomCookies } from '@/types/types';
+import { tryParseCookie } from '@/utils/helpers';
 
 import { HttpResponse } from '../../../../utils/httpResponse';
-import { IUser } from '../../user/model/user.model';
+import { UserService } from '../../user/services/user.service';
 import { LoginDTO } from '../dtos/auth.dtos';
 import { AuthServices } from '../services/auth.services';
 
 export class AuthControllers {
   async getMe(req: Request, res: Response) {
-    const user = req.user as IUser;
-    res.status(StatusCodes.OK).json(HttpResponse.Paginate(user));
+    const cookieHeader = req.headers.cookie;
+    const cookies: CustomCookies = tryParseCookie(String(cookieHeader));
+    const { accessToken, refreshToken } = cookies;
+    const decoded = jwt.verify(
+      String(refreshToken) || String(accessToken),
+      ConfignEnv.JWT_SECRET,
+    ) as JwtPayload & {
+      id: string;
+    };
+
+    const user = await UserService.getById(decoded.id);
+
+    res.status(StatusCodes.OK).json(HttpResponse.Paginate({ user, accessToken, refreshToken }));
   }
   async Login(req: Request, res: Response) {
     const data: LoginDTO = req.body;
@@ -22,6 +38,7 @@ export class AuthControllers {
         cookie.serialize('refreshToken', String(result.refreshToken), {
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'strict',
+          httpOnly: true,
           maxAge: 60 * 60 * 24 * 7, // 7 ngày
           path: '/',
         }),
@@ -33,6 +50,7 @@ export class AuthControllers {
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'strict',
           maxAge: 60 * 15, // 15 phut
+          httpOnly: true,
           path: '/',
         }),
       );
@@ -64,6 +82,25 @@ export class AuthControllers {
   async RefreshToken(req: Request, res: Response) {
     const refreshToken = req.headers.authorization?.split(' ')[1] as string;
     const result = await AuthServices.RefreshToken(refreshToken);
+
+    const cookies: string[] = [];
+
+    if (result) {
+      cookies.push(
+        cookie.serialize('accessToken', String(result), {
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 60 * 15, // 15 phut
+          httpOnly: true,
+          path: '/',
+        }),
+      );
+    }
+
+    // Set tất cả cookie cùng một lúc
+    if (cookies.length > 0) {
+      res.setHeader('Set-Cookie', cookies);
+    }
     res.status(200).json({
       code: 200,
       message: 'Token refreshed successfully',
@@ -76,8 +113,9 @@ export class AuthControllers {
     res.status(StatusCodes.OK).json(HttpResponse.Paginate(result));
   }
   async Logout(req: Request, res: Response) {
-    const { refreshToken } = req.body;
-    const result = await AuthServices.Logout(refreshToken);
+    const cookieHeader = req.headers.cookie;
+    const { refreshToken } = tryParseCookie(String(cookieHeader));
+    const result = await AuthServices.Logout(String(refreshToken));
     const cookies: string[] = [];
 
     if (result.refreshToken === '') {

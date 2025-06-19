@@ -17,7 +17,7 @@ const AuthController = new AuthControllers();
 AuthRoutes.post('/login', validate(LoginSchema), asyncHandler(AuthController.Login));
 AuthRoutes.get(
   '/@me',
-  passport.authenticate('jwt', { session: false }),
+  // passport.authenticate('jwt', { session: false }),
   asyncHandler(AuthController.getMe),
 );
 AuthRoutes.post('/send-otp', validate(otpSchema), asyncHandler(AuthController.SendOtp));
@@ -43,6 +43,7 @@ AuthRoutes.get(
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'strict',
           maxAge: 60 * 60 * 24 * 7,
+          httpOnly: true,
           path: '/',
         }),
       );
@@ -53,6 +54,7 @@ AuthRoutes.get(
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'strict',
           maxAge: 60 * 15,
+          httpOnly: true,
           path: '/',
         }),
       );
@@ -66,7 +68,7 @@ AuthRoutes.get(
   },
 );
 AuthRoutes.post('/check-token', asyncHandler(AuthController.checkToken));
-AuthRoutes.post(
+AuthRoutes.get(
   '/logout',
   passport.authenticate('jwt', { session: false }),
   asyncHandler(AuthController.Logout),

@@ -30,6 +30,7 @@ interface UserRoom {
 let onlineUsers: OnlineUsers[] = [];
 let userRoom: UserRoom[] = [];
 const userCalling: string[] = [];
+const PORT = process.env.NODE_ENV === 'production' ? process.env.PORT || 3000 : 4000;
 class WebSocketServer {
   private static instance: WebSocketServer | null = null;
   private io: Server | null = null;
@@ -40,10 +41,10 @@ class WebSocketServer {
     }
 
     WebSocketServer.instance = this;
-    server.listen(4000, () => {
-      logger.info('Websocket opening port 4000');
-    });
 
+    server.listen(PORT, () => {
+      logger.info(`Websocket opening port ${PORT}`);
+    });
     this.io = new Server(server, {
       cors: {
         origin: 'http://localhost:3000',
@@ -65,6 +66,7 @@ class WebSocketServer {
         try {
           const decoded = jwt.verify(refreshToken, ConfignEnv.JWT_SECRET) as { id: string };
           socket.handshake.auth.userId = decoded.id || '';
+
           next();
         } catch (error: any) {
           logger.error('Invalid token:', error.message);
