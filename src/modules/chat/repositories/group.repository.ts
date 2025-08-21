@@ -30,6 +30,7 @@ export class GroupRepository {
         .sort(sort)
         .populate('members', 'username email name avatar')
         .populate('createdBy', 'username email name avatar')
+        .populate('lastMessage', 'createdAt')
         .skip(paginate.skip)
         .limit(paginate.limit)
         .lean(),

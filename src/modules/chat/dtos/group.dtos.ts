@@ -1,5 +1,8 @@
 import { BaseFilters } from '@/utils/baseRepository';
 
+import { IGroupChat } from '../model/group.chat.model';
+import { IMessage } from '../model/message.model';
+
 export interface CreateGroupDTO {
   members: string[];
   isGroup: boolean;
@@ -20,3 +23,8 @@ export interface GroupFilters extends BaseFilters {
   userId?: string;
   groupName?: string;
 }
+
+export type GroupsChatFilter = Omit<IGroupChat, 'lastMessage'> & {
+  lastMessage: IMessage | null;
+  _id: string;
+};

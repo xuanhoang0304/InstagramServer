@@ -38,6 +38,7 @@ export class PostRepository {
     if (Object.keys(sorts).length > 0) {
       finalSort = { ...sorts };
     }
+
     const [result, total] = await Promise.all([
       PostModel.find(conditions)
         .sort(finalSort)

@@ -11,6 +11,7 @@ import { createServer } from 'http';
 import { StatusCodes } from 'http-status-codes';
 import morgan from 'morgan';
 
+import ConfignEnv from './config/env';
 import WebSocketServer from './config/ws';
 import i18nClient from './i18n';
 import passport from './middlewares/passport';
@@ -29,7 +30,8 @@ app.use(helmet.frameguard({ action: 'deny' }));
 app.use(helmet.xssFilter());
 app.use(
   cors({
-    origin: 'http://localhost:3000',
+    origin:
+      process.env.NODE_ENV === 'production' ? ConfignEnv.FRONTEND_URL : 'http://localhost:3000',
     credentials: true,
   }),
 );

@@ -1,5 +1,5 @@
 import { StatusCodes } from 'http-status-codes';
-import { isArray, uniq } from 'lodash';
+import { isArray, orderBy, uniq } from 'lodash';
 
 import { UserService } from '@/modules/account/user/services/user.service';
 import { AppError } from '@/utils/app-error';
@@ -8,6 +8,7 @@ import { BaseRepository } from '@/utils/baseRepository';
 import {
   CreateGroupDTO,
   GroupFilters,
+  GroupsChatFilter,
   UpdateGroup,
   UpdateMembersGroupDTO,
 } from '../dtos/group.dtos';
@@ -17,7 +18,14 @@ import { GroupRepository } from '../repositories/group.repository';
 export class GroupService {
   static async getGroups(filters: GroupFilters) {
     const data = await GroupRepository.getPagination(filters);
-    return data;
+    const groups: GroupsChatFilter[] = data.result.map((item) => ({
+      ...item,
+      lastMessage: item.lastMessage as any,
+      _id: String(item._id),
+    }));
+    const sortedGroups = orderBy(groups, 'lastMessage.createdAt', 'desc');
+
+    return { result: sortedGroups, totalResult: data.totalResult };
   }
   static async getById(id: string) {
     const result = (await GroupRepository.getById(id)) as IGroupChat;

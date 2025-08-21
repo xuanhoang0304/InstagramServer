@@ -30,7 +30,7 @@ interface UserRoom {
 let onlineUsers: OnlineUsers[] = [];
 let userRoom: UserRoom[] = [];
 const userCalling: string[] = [];
-const PORT = process.env.NODE_ENV === 'production' ? process.env.PORT || 3000 : 4000;
+const PORT = process.env.NODE_ENV === 'production' ? process.env.PORT : 4000;
 class WebSocketServer {
   private static instance: WebSocketServer | null = null;
   private io: Server | null = null;
@@ -47,7 +47,8 @@ class WebSocketServer {
     });
     this.io = new Server(server, {
       cors: {
-        origin: 'http://localhost:3000',
+        origin:
+          process.env.NODE_ENV === 'production' ? ConfignEnv.FRONTEND_URL : 'http://localhost:3000',
         methods: ['GET', 'POST'],
         credentials: true,
       },
@@ -91,14 +92,49 @@ class WebSocketServer {
         }
         onlineUsers.push({ socketId: socket.id, userId, groupsChat, curRoom: '' });
       }
-      socket.on('joinGroup', (data: { groupId: string; userId: string }) => {
-        socket.join(data.groupId);
+
+      // Chat
+      socket.on('join-room-chat', (roomId: string) => {
+        socket.join(roomId);
+      });
+      socket.on('leave-room-chat', (roomId: string | null) => {
+        if (!roomId) return;
+        socket.leave(roomId);
       });
       socket.on('createMessage', async (obj: { data: CreateMessage; curUserId: string }) => {
         const { data, curUserId } = obj;
         const newMessage = await MessageService.CreateMessage(data, curUserId);
         this.sendToRoom(data.groupId, 'newMessage', newMessage);
       });
+      socket.on(
+        'delete-message',
+        async (data: {
+          messageId: string;
+          curUserId: string;
+          groupId: string;
+          lastMessage: string | null;
+          isFristMessage: boolean;
+        }) => {
+          const message = await MessageService.DeleteMessage(data.messageId, data.curUserId);
+          if (message?._id) {
+            this.sendToRoom(data.groupId, 'delete-message', {
+              code: 204,
+              message,
+            });
+            if (data.lastMessage) {
+              await GroupService.updateGroup(
+                data.groupId,
+                { lastMessage: data.lastMessage },
+                data.curUserId,
+              );
+            }
+            if (data.isFristMessage) {
+              await GroupService.updateGroup(data.groupId, { lastMessage: null }, data.curUserId);
+            }
+          }
+        },
+      );
+      // Call video
       socket.on('calling', ({ user, group }) => {
         const freeUsers: string[] = group.members
           .filter((member: { _id: string }) => !userCalling.includes(member._id as string))
@@ -173,23 +209,36 @@ class WebSocketServer {
         },
       );
       socket.on('user-leave', (data: { groupId: string; uId: string }) => {
-        const { groupId, uId } = data;
-        userCalling.splice(userCalling.indexOf(uId), 1);
-        const uInR = userRoom.find((u) => u.roomId === groupId)?.users;
-        if (uInR) {
-          const newUsers = uInR.filter((u) => u.userId !== uId);
-          const newUInR = userRoom.map((item) =>
-            item.roomId === groupId ? { ...item, users: newUsers } : item,
-          );
-          userRoom = newUInR;
-          newUsers.forEach((u) => {
-            const socketId = onlineUsers.find((user) => user.userId === u.userId)?.socketId;
-            if (socketId) {
-              socket.to(socketId).emit('user-in-room', { result: newUsers, group: groupId });
-            }
-          });
-        }
+        userCalling.splice(userCalling.indexOf(data.uId), 1);
+        const newUserRoom = userRoom.map((item) =>
+          item.roomId === data.groupId
+            ? { ...item, users: item.users.filter((u) => u.userId !== data.uId) }
+            : item,
+        );
+        userRoom = newUserRoom;
+        // console.log('userRoom', userRoom);
+        const userInRoom = userRoom.find((i) => i.roomId === data.groupId)?.users;
+        this.sendToRoom(data.groupId, 'user-in-room', { result: userInRoom, group: data.groupId });
+        this.sendToRoom(data.groupId, 'user-leave', data);
       });
+      // socket.on('user-leave', (data: { groupId: string; uId: string }) => {
+      //   const { groupId, uId } = data;
+      //   userCalling.splice(userCalling.indexOf(uId), 1);
+      //   const uInR = userRoom.find((u) => u.roomId === groupId)?.users;
+      //   if (uInR) {
+      //     const newUsers = uInR.filter((u) => u.userId !== uId);
+      //     const newUInR = userRoom.map((item) =>
+      //       item.roomId === groupId ? { ...item, users: newUsers } : item,
+      //     );
+      //     userRoom = newUInR;
+      //     newUsers.forEach((u) => {
+      //       const socketId = onlineUsers.find((user) => user.userId === u.userId)?.socketId;
+      //       if (socketId) {
+      //         socket.to(socketId).emit('user-in-room', { result: newUsers, group: groupId });
+      //       }
+      //     });
+      //   }
+      // });
       socket.on('disconnect', () => {
         logger.info(`Client disconnected: ${socket.id}`);
         const userDisconnected = onlineUsers.find((u) => u.socketId === socket.id);
@@ -205,6 +254,10 @@ class WebSocketServer {
             this.sendToRoom(userLeave.roomId, 'user-in-room', {
               result: userInRoom,
               group: userLeave.roomId,
+            });
+            this.sendToRoom(userLeave.roomId, 'user-leave', {
+              groupId: userLeave.roomId,
+              uId: userDisconnected.userId,
             });
           }
         }

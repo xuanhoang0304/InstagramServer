@@ -18,6 +18,7 @@ const ConfignEnv = {
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET || '',
   MAX_SIZE_UPLOAD_IMG: process.env.MAX_SIZE_UPLOAD_IMG || 2,
   MAX_SIZE_UPLOAD_VIDEO: process.env.MAX_SIZE_UPLOAD_VIDEO || 5,
+  FRONTEND_URL: process.env.FRONTEND_URL || '',
 };
 
 export default ConfignEnv;
