@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/server.ts",
-    "start": "node dist/server.js",
+    "start": "node -r tsconfig-paths/register dist/server.js",
     "build": "tsc --build",
     "server": "node -r ts-node/register/transpile-only -r tsconfig-paths/register dist/server.js",
     "production": "npm install && npm run build",
@@ -48,7 +48,8 @@
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0",
     "yarn": "^1.22.22",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {
     "@types/cookie": "^1.0.0",
@@ -80,7 +81,6 @@
     "nodemon": "^3.1.9",
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.2"
   },
   "lint-staged": {
