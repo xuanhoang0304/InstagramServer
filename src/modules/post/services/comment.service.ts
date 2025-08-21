@@ -1,11 +1,12 @@
 import { StatusCodes } from 'http-status-codes';
-import { BaseFilters, BaseRepository } from '@/utils/baseRepository';
-import { PostRepository } from '../repositories/post.repository';
-import { PostModel } from '../model/post.model';
-import { AppError } from '@/utils/app-error';
+import { AppError } from '~/utils/app-error';
+import { BaseFilters, BaseRepository } from '~/utils/baseRepository';
+
 import { CreateCommentDTO, CreateReplyCommentDTO, UpdateCommentDTO } from '../dtos/comment.dto';
-import { CommentRepository } from '../repositories/comment.repository';
 import { CommentModel } from '../model/coment.model';
+import { PostModel } from '../model/post.model';
+import { CommentRepository } from '../repositories/comment.repository';
+import { PostRepository } from '../repositories/post.repository';
 
 export class CommentService {
   static async getReplies(parentCommentId: string, filters: BaseFilters) {

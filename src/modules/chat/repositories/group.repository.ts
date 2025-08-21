@@ -1,6 +1,5 @@
 import { Types } from 'mongoose';
-
-import { BaseRepository } from '@/utils/baseRepository';
+import { BaseRepository } from '~/utils/baseRepository';
 
 import { CreateGroupDTO, GroupFilters, UpdateGroup } from '../dtos/group.dtos';
 import { GroupChatModel } from '../model/group.chat.model';

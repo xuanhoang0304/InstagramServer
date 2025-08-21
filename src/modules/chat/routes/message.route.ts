@@ -1,8 +1,7 @@
 import { Router } from 'express';
 import passport from 'passport';
-
-import asyncHandler from '@/middlewares/asyncHandler';
-import { validate } from '@/middlewares/validate.middleware';
+import asyncHandler from '~/middlewares/asyncHandler';
+import { validate } from '~/middlewares/validate.middleware';
 
 import { MessageController } from '../controllers/message.controller';
 import { createMessage } from '../validators/message.validator';

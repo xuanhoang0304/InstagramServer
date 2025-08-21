@@ -1,9 +1,8 @@
 import { StatusCodes } from 'http-status-codes';
-
-import { UserModel } from '@/modules/account/user/model/user.model';
-import { UploadService } from '@/modules/upload/services/upload.service';
-import { AppError } from '@/utils/app-error';
-import { BaseFilters, BaseRepository } from '@/utils/baseRepository';
+import { UserModel } from '~/modules/account/user/model/user.model';
+import { UploadService } from '~/modules/upload/services/upload.service';
+import { AppError } from '~/utils/app-error';
+import { BaseFilters, BaseRepository } from '~/utils/baseRepository';
 
 import { CreatePostDTO, PostFilters, UpdatePostDTO } from '../dtos/post.dto';
 import { CommentModel } from '../model/coment.model';

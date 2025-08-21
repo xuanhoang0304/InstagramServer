@@ -2,10 +2,9 @@ import * as cookie from 'cookie';
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-
-import ConfignEnv from '@/config/env';
-import { CustomCookies } from '@/types/types';
-import { tryParseCookie } from '@/utils/helpers';
+import ConfignEnv from '~/config/env';
+import { CustomCookies } from '~/types/types';
+import { tryParseCookie } from '~/utils/helpers';
 
 import { HttpResponse } from '../../../../utils/httpResponse';
 import { UserService } from '../../user/services/user.service';
@@ -37,7 +36,8 @@ export class AuthControllers {
       cookies.push(
         cookie.serialize('refreshToken', String(result.refreshToken), {
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
+          sameSite: 'none',
+          domain: 'instagram-client-brown.vercel.app',
           httpOnly: true,
           maxAge: 60 * 60 * 24 * 7, // 7 ngày
           path: '/',
@@ -48,7 +48,8 @@ export class AuthControllers {
       cookies.push(
         cookie.serialize('accessToken', String(result.accessToken), {
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
+          sameSite: 'none',
+          domain: 'instagram-client-brown.vercel.app',
           maxAge: 60 * 15, // 15 phut
           httpOnly: true,
           path: '/',
@@ -89,7 +90,8 @@ export class AuthControllers {
       cookies.push(
         cookie.serialize('accessToken', String(result), {
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
+          sameSite: 'none',
+          domain: 'instagram-client-brown.vercel.app',
           maxAge: 60 * 15, // 15 phut
           httpOnly: true,
           path: '/',
@@ -122,7 +124,8 @@ export class AuthControllers {
       cookies.push(
         cookie.serialize('refreshToken', String(result.refreshToken), {
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
+          sameSite: 'none',
+          domain: 'instagram-client-brown.vercel.app',
           expires: new Date(0),
           path: '/',
         }),
@@ -132,7 +135,8 @@ export class AuthControllers {
       cookies.push(
         cookie.serialize('accessToken', String(result.accessToken), {
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
+          sameSite: 'none',
+          domain: 'instagram-client-brown.vercel.app',
           expires: new Date(0),
           path: '/',
         }),

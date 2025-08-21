@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-
-import { UserFilters } from '@/modules/account/user/dtos/user.dto';
-import { tryParseJson } from '@/utils/helpers';
+import { UserFilters } from '~/modules/account/user/dtos/user.dto';
+import { tryParseJson } from '~/utils/helpers';
 
 import { HttpResponse } from '../../../../utils/httpResponse';
 import { IUser } from '../model/user.model';

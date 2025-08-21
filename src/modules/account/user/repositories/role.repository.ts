@@ -1,8 +1,8 @@
-import ConfignEnv from '@/config/env';
-import { AdminSeeding } from '@/seeding/admin';
-import { PermissionSeeding } from '@/seeding/permission';
-import { RoleSeeding } from '@/seeding/role';
-import { logger } from '@/utils/logger';
+import ConfignEnv from '~/config/env';
+import { AdminSeeding } from '~/seeding/admin';
+import { PermissionSeeding } from '~/seeding/permission';
+import { RoleSeeding } from '~/seeding/role';
+import { logger } from '~/utils/logger';
 
 import { AdminModel } from '../model/admin.model';
 import { PermissionModel } from '../model/permission.model';

@@ -1,4 +1,4 @@
-import { CustomCookies } from '@/types/types';
+import { CustomCookies } from '~/types/types';
 
 export const tryParseJson = (str: any) => {
   try {

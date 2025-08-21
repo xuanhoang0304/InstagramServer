@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { HttpResponse } from '@/utils/httpResponse';
-import { AdminService } from '../services/admin.service';
+import { HttpResponse } from '~/utils/httpResponse';
+
 import { CreateAdminDTO } from '../dtos/admin.dto';
+import { AdminService } from '../services/admin.service';
 
 export class AdminController {
   async login(req: Request, res: Response) {

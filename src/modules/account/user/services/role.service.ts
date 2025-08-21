@@ -1,8 +1,9 @@
 import { StatusCodes } from 'http-status-codes';
-import { BaseRepository } from '@/utils/baseRepository';
-import { EPermissions } from '../model/permission.model';
+import { AppError } from '~/utils/app-error';
+import { BaseRepository } from '~/utils/baseRepository';
+
 import { AdminModel } from '../model/admin.model';
-import { AppError } from '@/utils/app-error';
+import { EPermissions } from '../model/permission.model';
 import { RoleModel } from '../model/role.model';
 
 export class RoleService {

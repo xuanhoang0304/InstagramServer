@@ -1,6 +1,5 @@
 import { Types } from 'mongoose';
-
-import { BaseRepository } from '@/utils/baseRepository';
+import { BaseRepository } from '~/utils/baseRepository';
 
 import { CreatePostDTO, PostFilters, UpdatePostDTO } from '../dtos/post.dto';
 import { PostModel } from '../model/post.model';

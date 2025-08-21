@@ -1,4 +1,4 @@
-import { BaseFilters } from '@/utils/baseRepository';
+import { BaseFilters } from '~/utils/baseRepository';
 
 import { EPostMediaType } from '../model/post.model';
 

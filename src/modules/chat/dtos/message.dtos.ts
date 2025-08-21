@@ -1,5 +1,5 @@
-import { IPostMedia } from '@/modules/post/model/post.model';
-import { BaseFilters } from '@/utils/baseRepository';
+import { IPostMedia } from '~/modules/post/model/post.model';
+import { BaseFilters } from '~/utils/baseRepository';
 
 export interface CreateMessage {
   groupId: string;

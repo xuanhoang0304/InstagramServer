@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { AnySchema } from 'yup';
-import { AppError } from '@/utils/app-error';
-import { formatErrorYup } from '@/utils/helpers';
+import { AppError } from '~/utils/app-error';
+import { formatErrorYup } from '~/utils/helpers';
 
 export const validate = (schema: AnySchema) => {
   return async (req: Request, _res: Response, next: NextFunction) => {

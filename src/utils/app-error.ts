@@ -1,6 +1,8 @@
+// src/utils/app-error.ts
 import { StatusCodes } from 'http-status-codes';
+
+import i18n from '../Ei18n'; // Thay '@/i18n' bằng '../i18n' hoặc giữ nếu dùng tsc-alias
 import { IAppError, IError } from '../types/errors';
-import i18nClient from '@/i18n';
 
 export class AppError implements IAppError {
   id: string;
@@ -22,7 +24,7 @@ export class AppError implements IAppError {
   translate(locale: string) {
     const params = this.params || {};
 
-    this.message = i18nClient.__({ phrase: this.message, locale }, params);
+    this.message = i18n.__({ phrase: this.message, locale }, params);
     if (this.errors) {
       const keys = Object.keys(this.errors);
 
@@ -31,7 +33,7 @@ export class AppError implements IAppError {
           this.errors[key] = this.errors[key].map((error) => {
             return {
               id: error.id,
-              message: i18nClient.__({ phrase: error.id, locale }, params),
+              message: i18n.__({ phrase: error.id, locale }, params),
             };
           });
         }

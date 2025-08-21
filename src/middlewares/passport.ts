@@ -2,9 +2,8 @@ import { StatusCodes } from 'http-status-codes';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
-
-import { UserService } from '@/modules/account/user/services/user.service';
-import { AppError } from '@/utils/app-error';
+import { UserService } from '~/modules/account/user/services/user.service';
+import { AppError } from '~/utils/app-error';
 
 import ConfignEnv from '../config/env';
 import { EAuthProvider } from '../modules/account/user/model/user.model';
@@ -38,7 +37,7 @@ passport.use(
     {
       clientID: process.env.GG_CLIENT_ID as string,
       clientSecret: process.env.GG_SECRET_ID as string,
-      callbackURL: '/api/auth/google/callback',
+      callbackURL: `${process.env.BACKEND_URL}/api/auth/google/callback`,
     },
     async (_accessToken: string, _refreshToken: string, profile, done) => {
       try {

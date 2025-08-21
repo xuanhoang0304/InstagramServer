@@ -1,6 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
-
-import { IPostMedia } from '@/modules/post/model/post.model';
+import { IPostMedia } from '~/modules/post/model/post.model';
 
 export enum EMessageReaction {
   LIKE = 'LIKE',

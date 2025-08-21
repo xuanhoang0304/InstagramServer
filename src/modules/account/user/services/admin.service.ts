@@ -1,12 +1,13 @@
-import { StatusCodes } from 'http-status-codes';
 import bcrypt from 'bcryptjs';
-import { BaseRepository } from '@/utils/baseRepository';
+import { StatusCodes } from 'http-status-codes';
+import { AuthServices } from '~/modules/account/auth/services/auth.services';
+import { AppError } from '~/utils/app-error';
+import { BaseRepository } from '~/utils/baseRepository';
+import handleHashPassword from '~/utils/handleHashPassword';
+
 import { CreateAdminDTO, LoginAdminDTO } from '../dtos/admin.dto';
 import { AdminModel } from '../model/admin.model';
-import { AppError } from '@/utils/app-error';
-import { AuthServices } from '@/modules/account/auth/services/auth.services';
 import { AdminRepository } from '../repositories/admin.repository';
-import handleHashPassword from '@/utils/handleHashPassword';
 
 export class AdminService {
   static async login(data: LoginAdminDTO) {

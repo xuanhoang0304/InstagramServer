@@ -1,11 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-
-import ConfignEnv from '@/config/env';
-import { EPermissions } from '@/modules/account/user/model/permission.model';
-import { RoleService } from '@/modules/account/user/services/role.service';
-import { AppError } from '@/utils/app-error';
+import ConfignEnv from '~/config/env';
+import { EPermissions } from '~/modules/account/user/model/permission.model';
+import { RoleService } from '~/modules/account/user/services/role.service';
+import { AppError } from '~/utils/app-error';
 
 export const authAdminMiddleware = (req: Request, _res: Response, next: NextFunction) => {
   try {

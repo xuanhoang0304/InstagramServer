@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { IUser } from '@/modules/account/user/model/user.model';
-import { HttpResponse } from '@/utils/httpResponse';
+import { IUser } from '~/modules/account/user/model/user.model';
+import { BaseFilters } from '~/utils/baseRepository';
+import { HttpResponse } from '~/utils/httpResponse';
+
 import { CreateCommentDTO, CreateReplyCommentDTO, UpdateCommentDTO } from '../dtos/comment.dto';
 import { CommentService } from '../services/comment.service';
-
-import { BaseFilters } from '@/utils/baseRepository';
 
 export class CommentController {
   async getReplies(req: Request, res: Response) {

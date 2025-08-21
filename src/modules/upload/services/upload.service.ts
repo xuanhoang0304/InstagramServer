@@ -1,8 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { extractPublicId } from 'cloudinary-build-url';
-
-import ConfignEnv from '@/config/env';
-import { EPostMediaType, IPostMedia } from '@/modules/post/model/post.model';
+import ConfignEnv from '~/config/env';
+import { EPostMediaType, IPostMedia } from '~/modules/post/model/post.model';
 
 cloudinary.config({
   cloud_name: ConfignEnv.CLOUDINARY_CLOUD_NAME,

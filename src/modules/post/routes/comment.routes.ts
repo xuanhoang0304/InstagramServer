@@ -1,14 +1,14 @@
 import { Router } from 'express';
-
 import passport from 'passport';
-import asyncHandler from '@/middlewares/asyncHandler';
-import { validate } from '@/middlewares/validate.middleware';
+import asyncHandler from '~/middlewares/asyncHandler';
+import { validate } from '~/middlewares/validate.middleware';
+
+import { CommentController } from '../controllers/comment.controller';
 import {
   createCommentSchema,
   createReplyCommentSchema,
   updateCommentSchema,
 } from '../validators/comment.validator';
-import { CommentController } from '../controllers/comment.controller';
 
 const CommentRoutes = Router();
 const commentController = new CommentController();

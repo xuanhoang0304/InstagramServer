@@ -1,14 +1,13 @@
 import bcrypt from 'bcryptjs';
 import { StatusCodes } from 'http-status-codes';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-
-import { RedisDB } from '@/config/redis';
-import { UserService } from '@/modules/account/user/services/user.service';
-import { StringValue } from '@/types/types';
-import { AppError } from '@/utils/app-error';
-import { BaseRepository } from '@/utils/baseRepository';
-import { generateOTP } from '@/utils/helpers';
-import { logger } from '@/utils/logger';
+import { RedisDB } from '~/config/redis';
+import { UserService } from '~/modules/account/user/services/user.service';
+import { StringValue } from '~/types/types';
+import { AppError } from '~/utils/app-error';
+import { BaseRepository } from '~/utils/baseRepository';
+import { generateOTP } from '~/utils/helpers';
+import { logger } from '~/utils/logger';
 
 import ConfignEnv from '../../../../config/env';
 import SendMail from '../../../../config/nodemailer';

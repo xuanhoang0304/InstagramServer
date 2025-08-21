@@ -1,14 +1,14 @@
 import { Router } from 'express';
-
-import asyncHandler from '@/middlewares/asyncHandler';
-import { validate } from '@/middlewares/validate.middleware';
-import { CreateAdminSchema, LoginAdminSchema } from '../validators/admin.validator';
-import { AdminController } from '../controllers/admin.controller';
+import asyncHandler from '~/middlewares/asyncHandler';
 import {
   authAdminMiddleware,
   checkPerrmissionMiddleware,
-} from '@/middlewares/authAdmin.middleware';
+} from '~/middlewares/authAdmin.middleware';
+import { validate } from '~/middlewares/validate.middleware';
+
+import { AdminController } from '../controllers/admin.controller';
 import { EPermissions } from '../model/permission.model';
+import { CreateAdminSchema, LoginAdminSchema } from '../validators/admin.validator';
 
 const adminRoutes = Router();
 const adminController = new AdminController();

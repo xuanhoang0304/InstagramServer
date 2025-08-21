@@ -1,4 +1,4 @@
-import { BaseRepository } from '@/utils/baseRepository';
+import { BaseRepository } from '~/utils/baseRepository';
 
 import { CreateMessage, MessageFilter } from '../dtos/message.dtos';
 import { MessageModel } from '../model/message.model';

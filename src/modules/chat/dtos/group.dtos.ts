@@ -1,4 +1,4 @@
-import { BaseFilters } from '@/utils/baseRepository';
+import { BaseFilters } from '~/utils/baseRepository';
 
 import { IGroupChat } from '../model/group.chat.model';
 import { IMessage } from '../model/message.model';

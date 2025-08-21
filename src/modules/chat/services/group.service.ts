@@ -1,9 +1,8 @@
 import { StatusCodes } from 'http-status-codes';
-import { isArray, orderBy, uniq } from 'lodash';
-
-import { UserService } from '@/modules/account/user/services/user.service';
-import { AppError } from '@/utils/app-error';
-import { BaseRepository } from '@/utils/baseRepository';
+import pkg from 'lodash';
+import { UserService } from '~/modules/account/user/services/user.service';
+import { AppError } from '~/utils/app-error';
+import { BaseRepository } from '~/utils/baseRepository';
 
 import {
   CreateGroupDTO,
@@ -14,6 +13,8 @@ import {
 } from '../dtos/group.dtos';
 import { GroupChatModel, IGroupChat } from '../model/group.chat.model';
 import { GroupRepository } from '../repositories/group.repository';
+
+const { isArray, orderBy, uniq } = pkg;
 
 export class GroupService {
   static async getGroups(filters: GroupFilters) {

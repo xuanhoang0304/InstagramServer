@@ -1,6 +1,5 @@
 import * as yup from 'yup';
-
-import { EPostMediaType } from '@/modules/post/model/post.model';
+import { EPostMediaType } from '~/modules/post/model/post.model';
 
 export const createMessage = yup.object({
   groupId: yup.string().required().length(24, 'Unformat object id'),

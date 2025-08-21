@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-
-import { RoleRepository } from '@/modules/account/user/repositories/role.repository';
+import { RoleRepository } from '~/modules/account/user/repositories/role.repository';
 
 import { logger } from '../utils/logger';
 import ConfignEnv from './env';

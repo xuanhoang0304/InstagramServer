@@ -1,8 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import diacritics from 'diacritics';
 import { Types } from 'mongoose';
-
-import { PostModel } from '@/modules/post/model/post.model';
+import { PostModel } from '~/modules/post/model/post.model';
 
 import { BaseRepository } from '../../../../utils/baseRepository';
 import { RegisterDTO } from '../../auth/dtos/auth.dtos';

@@ -1,11 +1,11 @@
 import * as cookie from 'cookie';
 import { Router } from 'express';
 import passport from 'passport';
-
-import asyncHandler from '@/middlewares/asyncHandler';
-import { validate } from '@/middlewares/validate.middleware';
-import { LoginSchema } from '@/modules/account/auth/validators/auth.validators';
-import { otpSchema, VerifyOtpSchema } from '@/modules/account/otp/validator/otp.validator';
+import ConfignEnv from '~/config/env';
+import asyncHandler from '~/middlewares/asyncHandler';
+import { validate } from '~/middlewares/validate.middleware';
+import { LoginSchema } from '~/modules/account/auth/validators/auth.validators';
+import { otpSchema, VerifyOtpSchema } from '~/modules/account/otp/validator/otp.validator';
 
 import { IUser } from '../../user/model/user.model';
 import { AuthControllers } from '../controllers/auth.controllers';
@@ -41,7 +41,8 @@ AuthRoutes.get(
       cookies.push(
         cookie.serialize('refreshToken', String(refreshToken), {
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
+          sameSite: 'none',
+          domain: 'instagram-client-brown.vercel.app',
           maxAge: 60 * 60 * 24 * 7,
           httpOnly: true,
           path: '/',
@@ -52,7 +53,8 @@ AuthRoutes.get(
       cookies.push(
         cookie.serialize('accessToken', String(token), {
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict',
+          sameSite: 'none',
+          domain: 'instagram-client-brown.vercel.app',
           maxAge: 60 * 15,
           httpOnly: true,
           path: '/',
@@ -63,7 +65,7 @@ AuthRoutes.get(
       res.setHeader('Set-Cookie', cookies);
     }
     res.redirect(
-      `http://localhost:3000/auth/google-callback?token=${token}&refreshToken=${refreshToken}`,
+      `${process.env.NODE_ENV === 'production' ? ConfignEnv.FRONTEND_URL : 'http://localhost:3000'}/api/auth/google-callback?token=${token}&refreshToken=${refreshToken}`,
     );
   },
 );

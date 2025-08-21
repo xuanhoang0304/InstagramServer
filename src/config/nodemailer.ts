@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import { logger } from '@/utils/logger';
+import { logger } from '~/utils/logger';
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',

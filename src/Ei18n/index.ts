@@ -1,12 +1,14 @@
-import { I18n } from 'i18n';
 import path from 'path';
 
-const i18nClient = new I18n({
+const i18n = require('i18n');
+
+i18n.configure({
   defaultLocale: 'vi',
   locales: ['en', 'vi'],
   directory: path.join(__dirname, 'locales'),
   autoReload: true,
-  syncFiles: false,
+  updateFiles: false,
+  objectNotation: true,
 });
 
-export default i18nClient;
+export default i18n;

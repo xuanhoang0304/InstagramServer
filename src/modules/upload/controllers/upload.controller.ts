@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-
-import ConfignEnv from '@/config/env';
-import { EPostMediaType, IPostMedia } from '@/modules/post/model/post.model';
-import { AppError } from '@/utils/app-error';
-import { HttpResponse } from '@/utils/httpResponse';
+import ConfignEnv from '~/config/env';
+import { EPostMediaType, IPostMedia } from '~/modules/post/model/post.model';
+import { AppError } from '~/utils/app-error';
+import { HttpResponse } from '~/utils/httpResponse';
 
 import { RemoveFileDTO } from '../dtos/upload.dto';
 import { UploadService } from '../services/upload.service';

@@ -1,9 +1,8 @@
 import { Router } from 'express';
 import passport from 'passport';
-
-import { UploadImageClient, UploadVideoClient } from '@/config/cloudinary';
-import asyncHandler from '@/middlewares/asyncHandler';
-import { validate } from '@/middlewares/validate.middleware';
+import { UploadImageClient, UploadVideoClient } from '~/config/cloudinary';
+import asyncHandler from '~/middlewares/asyncHandler';
+import { validate } from '~/middlewares/validate.middleware';
 
 import { UploadController } from '../controllers/upload.controller';
 import { removeFileSchema2 } from '../validators/upload.validator';

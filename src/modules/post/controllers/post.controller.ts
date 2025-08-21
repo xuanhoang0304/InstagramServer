@@ -1,10 +1,9 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-
-import { IUser } from '@/modules/account/user/model/user.model';
-import { BaseFilters } from '@/utils/baseRepository';
-import { tryParseJson } from '@/utils/helpers';
-import { HttpResponse } from '@/utils/httpResponse';
+import { IUser } from '~/modules/account/user/model/user.model';
+import { BaseFilters } from '~/utils/baseRepository';
+import { tryParseJson } from '~/utils/helpers';
+import { HttpResponse } from '~/utils/httpResponse';
 
 import { PostFilters } from '../dtos/post.dto';
 import { PostService } from '../services/post.service';

@@ -1,8 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
-
-import { UploadService } from '@/modules/upload/services/upload.service';
-import { AppError } from '@/utils/app-error';
-import { BaseRepository } from '@/utils/baseRepository';
+import { UploadService } from '~/modules/upload/services/upload.service';
+import { AppError } from '~/utils/app-error';
+import { BaseRepository } from '~/utils/baseRepository';
 
 import { CreateMessage, MessageFilter } from '../dtos/message.dtos';
 import { GroupChatModel } from '../model/group.chat.model';

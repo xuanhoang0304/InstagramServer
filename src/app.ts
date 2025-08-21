@@ -13,7 +13,7 @@ import morgan from 'morgan';
 
 import ConfignEnv from './config/env';
 import WebSocketServer from './config/ws';
-import i18nClient from './i18n';
+import i18n from './Ei18n';
 import passport from './middlewares/passport';
 import modules from './modules';
 import { AppError } from './utils/app-error';
@@ -25,7 +25,7 @@ const app = express();
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(i18nClient.init);
+app.use(i18n.init);
 app.use(helmet.frameguard({ action: 'deny' }));
 app.use(helmet.xssFilter());
 app.use(
@@ -43,7 +43,7 @@ const server = createServer(app);
 WebSocketServer.getInstance(server);
 
 // Xử lý lỗi 404
-app.use('*', () => {
+app.use('/api/*', () => {
   throw new AppError({
     id: 'app.middleware',
     message: 'API_NOTFOUND',
@@ -74,4 +74,4 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-export default app;
+export default server;

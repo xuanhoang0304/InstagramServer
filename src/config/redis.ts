@@ -1,7 +1,6 @@
 import { createClient, RedisArgument, SetOptions } from 'redis';
-
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { logger } from '@/utils/logger';
+import { logger } from '~/utils/logger';
 
 export class RedisDB {
   private client: any = null;

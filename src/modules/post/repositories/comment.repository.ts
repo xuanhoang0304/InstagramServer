@@ -1,4 +1,5 @@
-import { BaseFilters, BaseRepository } from '@/utils/baseRepository';
+import { BaseFilters, BaseRepository } from '~/utils/baseRepository';
+
 import { CreateCommentDTO, CreateReplyCommentDTO } from '../dtos/comment.dto';
 import { CommentModel, IComment } from '../model/coment.model';
 import { PostModel } from '../model/post.model';

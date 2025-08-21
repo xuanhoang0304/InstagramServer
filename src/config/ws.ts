@@ -3,11 +3,10 @@ import * as cookie from 'cookie';
 import { Server as HttpServer } from 'http';
 import jwt from 'jsonwebtoken';
 import { Server, Socket } from 'socket.io';
-
-import { CreateMessage } from '@/modules/chat/dtos/message.dtos';
-import { GroupService } from '@/modules/chat/services/group.service';
-import { MessageService } from '@/modules/chat/services/message.services';
-import { logger } from '@/utils/logger';
+import { CreateMessage } from '~/modules/chat/dtos/message.dtos';
+import { GroupService } from '~/modules/chat/services/group.service';
+import { MessageService } from '~/modules/chat/services/message.services';
+import { logger } from '~/utils/logger';
 
 import ConfignEnv from './env';
 
@@ -42,16 +41,15 @@ class WebSocketServer {
 
     WebSocketServer.instance = this;
 
-    server.listen(PORT, () => {
-      logger.info(`Websocket opening port ${PORT}`);
-    });
     this.io = new Server(server, {
       cors: {
         origin:
           process.env.NODE_ENV === 'production' ? ConfignEnv.FRONTEND_URL : 'http://localhost:3000',
         methods: ['GET', 'POST'],
         credentials: true,
+        allowedHeaders: ['Authorization', 'Content-Type'],
       },
+      transports: ['websocket'],
     });
     this.io.use((socket, next) => {
       const cookieHeader = socket.handshake.headers.cookie;
@@ -216,29 +214,12 @@ class WebSocketServer {
             : item,
         );
         userRoom = newUserRoom;
-        // console.log('userRoom', userRoom);
+
         const userInRoom = userRoom.find((i) => i.roomId === data.groupId)?.users;
         this.sendToRoom(data.groupId, 'user-in-room', { result: userInRoom, group: data.groupId });
         this.sendToRoom(data.groupId, 'user-leave', data);
       });
-      // socket.on('user-leave', (data: { groupId: string; uId: string }) => {
-      //   const { groupId, uId } = data;
-      //   userCalling.splice(userCalling.indexOf(uId), 1);
-      //   const uInR = userRoom.find((u) => u.roomId === groupId)?.users;
-      //   if (uInR) {
-      //     const newUsers = uInR.filter((u) => u.userId !== uId);
-      //     const newUInR = userRoom.map((item) =>
-      //       item.roomId === groupId ? { ...item, users: newUsers } : item,
-      //     );
-      //     userRoom = newUInR;
-      //     newUsers.forEach((u) => {
-      //       const socketId = onlineUsers.find((user) => user.userId === u.userId)?.socketId;
-      //       if (socketId) {
-      //         socket.to(socketId).emit('user-in-room', { result: newUsers, group: groupId });
-      //       }
-      //     });
-      //   }
-      // });
+
       socket.on('disconnect', () => {
         logger.info(`Client disconnected: ${socket.id}`);
         const userDisconnected = onlineUsers.find((u) => u.socketId === socket.id);

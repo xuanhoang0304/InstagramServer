@@ -1,7 +1,6 @@
 import cron from 'node-cron';
-import { OtpModel } from '@/modules/account/otp/models/otp.model';
-
-import { logger } from '@/utils/logger';
+import { OtpModel } from '~/modules/account/otp/models/otp.model';
+import { logger } from '~/utils/logger';
 
 cron.schedule('*/10 * * * *', async () => {
   const now = new Date();
