@@ -22,45 +22,12 @@ export class AuthControllers {
     ) as JwtPayload & {
       id: string;
     };
-
     const user = await UserService.getById(decoded.id);
-
     res.status(StatusCodes.OK).json(HttpResponse.Paginate({ user, accessToken, refreshToken }));
   }
   async Login(req: Request, res: Response) {
     const data: LoginDTO = req.body;
     const result = await AuthServices.Login(data);
-    const cookies: string[] = [];
-
-    if (result.refreshToken) {
-      cookies.push(
-        cookie.serialize('refreshToken', String(result.refreshToken), {
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'none',
-          domain: 'instagram-client-brown.vercel.app',
-          httpOnly: true,
-          maxAge: 60 * 60 * 24 * 7, // 7 ngày
-          path: '/',
-        }),
-      );
-    }
-    if (result.accessToken) {
-      cookies.push(
-        cookie.serialize('accessToken', String(result.accessToken), {
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'none',
-          domain: 'instagram-client-brown.vercel.app',
-          maxAge: 60 * 15, // 15 phut
-          httpOnly: true,
-          path: '/',
-        }),
-      );
-    }
-
-    // Set tất cả cookie cùng một lúc
-    if (cookies.length > 0) {
-      res.setHeader('Set-Cookie', cookies);
-    }
     res.status(200).json(HttpResponse.login(result));
   }
   async SendOtp(req: Request, res: Response) {
@@ -81,28 +48,21 @@ export class AuthControllers {
     });
   }
   async RefreshToken(req: Request, res: Response) {
-    const refreshToken = req.headers.authorization?.split(' ')[1] as string;
-    const result = await AuthServices.RefreshToken(refreshToken);
-
-    const cookies: string[] = [];
+    const cookieHeader = req.headers.cookie;
+    const cookies: CustomCookies = tryParseCookie(String(cookieHeader));
+    const { refreshToken } = cookies;
+    const result = await AuthServices.RefreshToken(refreshToken as string);
 
     if (result) {
-      cookies.push(
-        cookie.serialize('accessToken', String(result), {
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'none',
-          domain: 'instagram-client-brown.vercel.app',
-          maxAge: 60 * 15, // 15 phut
-          httpOnly: true,
-          path: '/',
-        }),
-      );
+      res.cookie('accessToken', result, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        maxAge: 15 * 60 * 1000,
+        path: '/',
+      });
     }
 
-    // Set tất cả cookie cùng một lúc
-    if (cookies.length > 0) {
-      res.setHeader('Set-Cookie', cookies);
-    }
     res.status(200).json({
       code: 200,
       message: 'Token refreshed successfully',
@@ -123,9 +83,8 @@ export class AuthControllers {
     if (result.refreshToken === '') {
       cookies.push(
         cookie.serialize('refreshToken', String(result.refreshToken), {
-          secure: process.env.NODE_ENV === 'production',
+          secure: true,
           sameSite: 'none',
-          domain: 'instagram-client-brown.vercel.app',
           expires: new Date(0),
           path: '/',
         }),
@@ -134,9 +93,8 @@ export class AuthControllers {
     if (result.accessToken === '') {
       cookies.push(
         cookie.serialize('accessToken', String(result.accessToken), {
-          secure: process.env.NODE_ENV === 'production',
+          secure: true,
           sameSite: 'none',
-          domain: 'instagram-client-brown.vercel.app',
           expires: new Date(0),
           path: '/',
         }),

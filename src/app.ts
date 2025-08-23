@@ -3,6 +3,7 @@
 import './config/nodemailer';
 import './cron/otpCleanup';
 
+import cookieParser from 'cookie-parser';
 // import './cron/cloudinaryCleanUp';
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
@@ -28,6 +29,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(i18n.init);
 app.use(helmet.frameguard({ action: 'deny' }));
 app.use(helmet.xssFilter());
+app.use(cookieParser());
+
 app.use(
   cors({
     origin:
