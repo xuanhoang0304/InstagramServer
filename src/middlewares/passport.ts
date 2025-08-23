@@ -1,15 +1,44 @@
+import { Request } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
+import { Strategy as JwtStrategy } from 'passport-jwt';
 import { UserService } from '~/modules/account/user/services/user.service';
 import { AppError } from '~/utils/app-error';
 
 import ConfignEnv from '../config/env';
 import { EAuthProvider } from '../modules/account/user/model/user.model';
 
+const cookieExtractor = (req: Request) => {
+  const { accessToken, refreshToken } = req.cookies;
+  try {
+    const reFreshTokenDecoded = jwt.verify(refreshToken, ConfignEnv.JWT_SECRET) as JwtPayload & {
+      id: string;
+    };
+
+    if (!reFreshTokenDecoded.id) {
+      throw new AppError({
+        id: 'Passport.cookieExtractor',
+        message: 'Token invalid',
+        statusCode: StatusCodes.UNAUTHORIZED,
+      });
+    }
+  } catch (error: any) {
+    throw new AppError({
+      id: 'Passport.cookieExtractor',
+      message: error.message,
+      statusCode: StatusCodes.UNAUTHORIZED,
+    });
+  }
+  return accessToken || null;
+};
+// const jwtOptions = {
+//   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+//   secretOrKey: ConfignEnv.JWT_SECRET,
+// };
 const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: cookieExtractor,
   secretOrKey: ConfignEnv.JWT_SECRET,
 };
 
@@ -17,6 +46,7 @@ passport.use(
   new JwtStrategy(jwtOptions, async (jwtPayload, done) => {
     try {
       const user = await UserService.getById(jwtPayload.id);
+
       if (!user) {
         throw new AppError({
           id: 'passport.jwt.err',
@@ -37,7 +67,7 @@ passport.use(
     {
       clientID: process.env.GG_CLIENT_ID as string,
       clientSecret: process.env.GG_SECRET_ID as string,
-      callbackURL: `${process.env.BACKEND_URL}/api/auth/google/callback`,
+      callbackURL: `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/google/callback`,
     },
     async (_accessToken: string, _refreshToken: string, profile, done) => {
       try {

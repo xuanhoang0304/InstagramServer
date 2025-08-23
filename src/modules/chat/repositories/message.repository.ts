@@ -22,7 +22,7 @@ export class MessageRepository {
         .sort(sort)
         .limit(paginate.limit)
         .skip(paginate.skip)
-        .populate('sender', 'username email name avatar')
+        .populate('sender', 'username email name avatar isReal')
         .populate('parentMessage', 'text images videos sender parentMessage'),
       MessageModel.find(conditions).countDocuments(),
     ]);
@@ -41,11 +41,11 @@ export class MessageRepository {
     ).toObject();
 
     const result = await MessageModel.findById(message._id)
-      .populate('sender', 'username email name avatar')
+      .populate('sender', 'username email name avatar isReal')
       .populate({
         path: 'parentMessage',
         select: 'text images videos sender createdAt',
-        populate: { path: 'sender', select: 'username email name avatar' },
+        populate: { path: 'sender', select: 'username email name avatar isReal' },
       });
 
     return result;

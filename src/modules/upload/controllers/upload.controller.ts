@@ -48,7 +48,13 @@ export class UploadController {
         statusCode: StatusCodes.BAD_REQUEST,
       });
     }
-    const data = { type: EPostMediaType.Video, path: request.file.path };
+    const videoUrl = request.file.path;
+    // ✅ Public ID của video (Cloudinary multer-storage-cloudinary có gán sẵn)
+    const publicId = (request.file as any).filename;
+    const cloudName = ConfignEnv.CLOUDINARY_CLOUD_NAME;
+    const thumbnailUrl = `https://res.cloudinary.com/${cloudName}/video/upload/so_auto,q_auto,f_webp/${publicId}.jpg`;
+
+    const data = { type: EPostMediaType.Video, path: request.file.path, thumbnailUrl };
     response.status(StatusCodes.CREATED).json(HttpResponse.created(data));
   }
   static async removeFile(request: Request, response: Response) {

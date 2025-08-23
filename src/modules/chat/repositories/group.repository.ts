@@ -24,11 +24,12 @@ export class GroupRepository {
   static async getPagination(filters: GroupFilters) {
     const condition = this.getQueries(filters);
     const { sort, paginate } = await BaseRepository.getQuery(filters);
+
     const [result, totalResult] = await Promise.all([
       GroupChatModel.find(condition)
         .sort(sort)
-        .populate('members', 'username email name avatar')
-        .populate('createdBy', 'username email name avatar')
+        .populate('members', 'username email name avatar isReal')
+        .populate('createdBy', 'username email name avatar isReal')
         .populate('lastMessage', 'createdAt')
         .skip(paginate.skip)
         .limit(paginate.limit)
@@ -42,8 +43,9 @@ export class GroupRepository {
   }
   static async getById(id: string) {
     const result = await GroupChatModel.findById(new Types.ObjectId(id))
-      .populate('members', 'username email name avatar')
-      .populate('createdBy', 'username email name avatar')
+      .populate('members', 'username email name avatar isReal name_normailized')
+      .populate('groupAdmin', 'username email name avatar isReal name_normailized')
+      .populate('createdBy', 'username email name avatar isReal')
       .lean();
     return result;
   }
@@ -79,6 +81,13 @@ export class GroupRepository {
   static async removeAdminGroup(userId: string, groupId: string) {
     await GroupChatModel.findByIdAndUpdate(groupId, {
       $pull: {
+        groupAdmin: userId,
+      },
+    });
+  }
+  static async addAdminGroup(userId: string, groupId: string) {
+    await GroupChatModel.findByIdAndUpdate(groupId, {
+      $push: {
         groupAdmin: userId,
       },
     });

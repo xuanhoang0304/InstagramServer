@@ -24,7 +24,7 @@ export class GroupService {
       lastMessage: item.lastMessage as any,
       _id: String(item._id),
     }));
-    const sortedGroups = orderBy(groups, 'lastMessage.createdAt', 'desc');
+    const sortedGroups = orderBy(groups, 'lastMessage.updatedAt', 'desc');
 
     return { result: sortedGroups, totalResult: data.totalResult };
   }
@@ -128,6 +128,19 @@ export class GroupService {
         message: 'You are not in this group',
       });
     }
+    if (data.action === 'add-admin') {
+      const adminGroup = oldGroup.groupAdmin.map((id) => String(id));
+      await Promise.all(
+        data.members.map(async (member) => {
+          if (adminGroup.includes(member)) {
+            await GroupRepository.removeAdminGroup(member, String(oldGroup._id));
+            return;
+          }
+          GroupRepository.addAdminGroup(member, String(oldGroup._id));
+        }),
+      );
+      return;
+    }
     const newMember = uniq([...groupMembers, ...data.members]) as string[];
     const result = await GroupRepository.updateMembers(groupId, newMember);
     return result;
@@ -150,9 +163,11 @@ export class GroupService {
       });
     }
     const groupMembers = oldGroup.members.map((id) => String(id));
-
     const adminGroup = oldGroup.groupAdmin.map((id) => String(id));
-    if (!groupMembers.includes(curUserId) || !adminGroup.includes(curUserId)) {
+    if (
+      !groupMembers.includes(curUserId) ||
+      (!adminGroup.includes(curUserId) && data.action === 'delete-member')
+    ) {
       throw new AppError({
         id: 'GroupService.deleteMembers',
         statusCode: StatusCodes.BAD_REQUEST,
@@ -166,9 +181,13 @@ export class GroupService {
         message: "You cant delete owner's group",
       });
     }
-    if (adminGroup.includes(curUserId) && data.members.includes(curUserId)) {
-      GroupRepository.removeAdminGroup(curUserId, groupId);
-    }
+    Promise.all(
+      data.members.map(async (member) => {
+        if (adminGroup.includes(member)) {
+          GroupRepository.removeAdminGroup(member, String(oldGroup._id));
+        }
+      }),
+    );
     const newMember = uniq(
       [...groupMembers].filter((item) => !data.members.includes(item)),
     ) as string[];

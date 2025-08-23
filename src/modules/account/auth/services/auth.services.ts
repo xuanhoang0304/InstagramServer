@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { RedisDB } from '~/config/redis';
@@ -127,28 +128,33 @@ export class AuthServices {
 
     return result;
   }
-  static async RefreshToken(refreshToken: string) {
-    const now = Math.floor(Date.now() / 1000);
-    const decodedRefreshToken = jwt.verify(refreshToken, ConfignEnv.JWT_SECRET) as JwtPayload & {
-      id: string;
-    };
-    const existedgUser = await UserService.getById(decodedRefreshToken.id);
-    if (!existedgUser) {
-      throw new AppError({
-        id: 'AuthService.RefreshToken',
-        message: 'USER_NOTFOUND',
-        statusCode: StatusCodes.NOT_FOUND,
-      });
+  static async RefreshToken(refreshToken: string, res: Response) {
+    try {
+      const now = Math.floor(Date.now() / 1000);
+      const decodedRefreshToken = jwt.verify(refreshToken, ConfignEnv.JWT_SECRET) as JwtPayload & {
+        id: string;
+      };
+      const existedgUser = await UserService.getById(decodedRefreshToken.id);
+      if (!existedgUser) {
+        throw new AppError({
+          id: 'AuthService.RefreshToken',
+          message: 'USER_NOTFOUND',
+          statusCode: StatusCodes.NOT_FOUND,
+        });
+      }
+      if (decodedRefreshToken.exp && decodedRefreshToken?.exp < now) {
+        throw new AppError({
+          id: 'AuthService.RefreshToken',
+          message: 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại',
+          statusCode: StatusCodes.BAD_REQUEST,
+        });
+      }
+      const accessToken = this.signJWT(existedgUser, '15m');
+      return accessToken;
+    } catch (error: any) {
+      res.clearCookie('refreshToken');
+      throw new Error(error.message);
     }
-    if (decodedRefreshToken.exp && decodedRefreshToken?.exp < now) {
-      throw new AppError({
-        id: 'AuthService.RefreshToken',
-        message: 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại',
-        statusCode: StatusCodes.BAD_REQUEST,
-      });
-    }
-    const accessToken = this.signJWT(existedgUser, '15m');
-    return accessToken;
   }
 
   static async checkToken(token: string) {

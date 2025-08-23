@@ -11,7 +11,6 @@ const router = Router();
 
 router.post(
   '/video',
-  passport.authenticate('jwt', { session: false }),
   UploadVideoClient.single('video'),
   asyncHandler(UploadController.uploadVideo),
 );

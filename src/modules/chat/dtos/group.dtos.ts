@@ -13,6 +13,7 @@ export interface CreateGroupDTO {
 }
 export interface UpdateMembersGroupDTO {
   members: string[];
+  action: 'add-member' | 'add-admin' | 'leave-group' | 'delete-member';
 }
 export interface UpdateGroup {
   groupAvt?: string;
