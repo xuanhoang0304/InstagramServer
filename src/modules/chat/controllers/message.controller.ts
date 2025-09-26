@@ -22,19 +22,23 @@ export class MessageController {
     const result = await MessageService.getPagination(messageFilters);
     res.status(StatusCodes.OK).json(HttpResponse.Paginate(result));
   }
+  async getMessageById(req: Request, res: Response) {
+    const msgId = req.params.msgId;
+    const result = await MessageService.getMessageById(msgId);
+    res.status(StatusCodes.OK).json(HttpResponse.Paginate(result));
+  }
   async createMessage(req: Request, res: Response) {
     const user = req.user as IUser;
     const curUserId = String(user._id);
     const data = req.body as CreateMessage;
-    const result = await MessageService.CreateMessage(data, curUserId);
+    const result = await MessageService.createMessage(data, curUserId);
     res.status(StatusCodes.CREATED).json(HttpResponse.created(result));
   }
-
-  async DeleteMessage(req: Request, res: Response) {
+  async deleteMessage(req: Request, res: Response) {
     const user = req.user as IUser;
     const curUserId = String(user._id);
     const msgId = req.params.msgId;
-    const result = await MessageService.DeleteMessage(msgId, curUserId);
+    const result = await MessageService.deleteMessage(msgId, curUserId);
     res.status(StatusCodes.CREATED).json(HttpResponse.deleted(result));
   }
 }

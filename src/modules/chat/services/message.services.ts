@@ -25,7 +25,11 @@ export class MessageService {
     const result = await MessageRepository.getPagination(filters);
     return result;
   }
-  static async CreateMessage(data: CreateMessage, curUserId: string) {
+  static async getMessageById(msgId: string) {
+    const result = await MessageRepository.getMessageById(msgId);
+    return result;
+  }
+  static async createMessage(data: CreateMessage, curUserId: string) {
     const group = await GroupService.getById(data.groupId);
     if (!group) {
       throw new AppError({
@@ -44,11 +48,11 @@ export class MessageService {
     const finalData: CreateMessage = data.parentMessage
       ? { ...data, parentMessage: data.parentMessage }
       : data;
-    const result = await MessageRepository.CreateMessage(finalData, curUserId);
+    const result = await MessageRepository.createMessage(finalData, curUserId);
     GroupRepository.updateGroup({ ...group, lastMessage: result?._id as string }, data.groupId);
     return result;
   }
-  static async DeleteMessage(msgId: string, curUserId: string) {
+  static async deleteMessage(msgId: string, curUserId: string) {
     const message = await BaseRepository.getById(MessageModel, msgId);
     if (!message) {
       throw new AppError({

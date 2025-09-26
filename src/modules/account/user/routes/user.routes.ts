@@ -4,7 +4,7 @@ import asyncHandler from '~/middlewares/asyncHandler';
 import { validate } from '~/middlewares/validate.middleware';
 
 import { UserController } from '../controllers/user.controller';
-import { RegisterUserSchema } from '../validators/user.validator';
+import { RegisterUserSchema, UpdateUserSchema } from '../validators/user.validator';
 
 const userRoutes = Router();
 const userController = new UserController();
@@ -25,6 +25,13 @@ userRoutes.get(
 );
 // Register User
 userRoutes.post('/', validate(RegisterUserSchema), asyncHandler(userController.registerUser));
+// Update Info User
+userRoutes.put(
+  '/:id',
+  passport.authenticate('jwt', { session: false }),
+  validate(UpdateUserSchema),
+  asyncHandler(userController.updateInfo),
+);
 // Follow / Unfollow user
 userRoutes.put(
   '/:id/follow',

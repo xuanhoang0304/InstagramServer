@@ -43,7 +43,7 @@ app.use(passport.initialize());
 
 app.use('/api', modules);
 const server = createServer(app);
-WebSocketServer.getInstance(server);
+export const wsServer = WebSocketServer.getInstance(server);
 
 // Xử lý lỗi 404
 app.use('/api/*', () => {

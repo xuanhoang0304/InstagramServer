@@ -5,7 +5,7 @@ import { PostModel } from '~/modules/post/model/post.model';
 
 import { BaseRepository } from '../../../../utils/baseRepository';
 import { RegisterDTO } from '../../auth/dtos/auth.dtos';
-import { UserFilters } from '../dtos/user.dto';
+import { UpdateUserDTO, UserFilters } from '../dtos/user.dto';
 import { UserModel } from '../model/user.model';
 
 export class UserRepository {
@@ -28,15 +28,25 @@ export class UserRepository {
       condition._id = { $nin: filtersArr };
     }
     if (filters.excludes && filters.excludes.length) {
-      condition._id = { $nin: filters.excludes };
+      condition._id = { $nin: filters.excludes.map((id) => new Types.ObjectId(id)) };
     }
     return { condition };
   }
   static async getExploreUsers(filters: UserFilters) {
     const { paginate } = await BaseRepository.getQuery(filters);
     const { condition } = this.getQuery(filters);
+
     const [result, totalResult] = await Promise.all([
-      UserModel.aggregate([{ $match: condition }, { $sample: { size: paginate.limit } }]),
+      UserModel.aggregate([
+        { $match: condition },
+        {
+          $project: {
+            username: 0,
+            password: 0,
+          },
+        },
+        { $sample: { size: paginate.limit } },
+      ]),
       UserModel.find(condition).countDocuments(),
     ]);
 
@@ -58,7 +68,7 @@ export class UserRepository {
         name_normailized: diacritics.remove(data.name).toLowerCase(),
       })
     ).toObject();
-    const { password, ...result } = user;
+    const { password, username, ...result } = user;
     return result;
   }
   static async getById(id: string) {
@@ -156,5 +166,10 @@ export class UserRepository {
       ).populate('createdBy', 'name avatar isReal'),
     ]);
     return post;
+  }
+  static async updateUserInfo(userId: string, data: UpdateUserDTO) {
+    const newUser = await UserModel.findByIdAndUpdate(userId, data, { new: true }).lean();
+
+    return newUser;
   }
 }

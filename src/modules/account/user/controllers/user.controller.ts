@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { UserFilters } from '~/modules/account/user/dtos/user.dto';
+import { UpdateUserDTO, UserFilters } from '~/modules/account/user/dtos/user.dto';
+import { AppError } from '~/utils/app-error';
 import { tryParseJson } from '~/utils/helpers';
 
 import { HttpResponse } from '../../../../utils/httpResponse';
@@ -21,7 +22,6 @@ export class UserController {
     const result = await UserService.getPaginate(Usertfilters);
     res.status(StatusCodes.OK).json(HttpResponse.Paginate(result));
   }
-
   async getUserById(req: Request, res: Response) {
     const userId = req.params.id;
     const result = await UserService.getById(userId);
@@ -66,6 +66,20 @@ export class UserController {
     const userId = String(user._id);
     const postId = req.params.postId;
     const result = await UserService.likePost(userId, postId);
+    res.status(StatusCodes.OK).json(HttpResponse.updated(result));
+  }
+  async updateInfo(req: Request, res: Response) {
+    const curUser = req.user as IUser;
+    const editUserId = req.params.id;
+    if (String(curUser?._id) !== editUserId) {
+      throw new AppError({
+        id: 'UserController.updateInfo',
+        message: "You can't edit other user's info",
+        statusCode: StatusCodes.FORBIDDEN,
+      });
+    }
+    const data = req.body as UpdateUserDTO;
+    const result = await UserService.updateInfo(editUserId, data);
     res.status(StatusCodes.OK).json(HttpResponse.updated(result));
   }
 }
