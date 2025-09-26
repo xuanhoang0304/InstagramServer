@@ -12,4 +12,5 @@ export const updateCommentSchema = yup.object({
 export const createReplyCommentSchema = yup.object({
   content: yup.string().trim().required('FIELD_REQUIRED'),
   postId: yup.string().required('FIELD_REQUIRED'),
+  replyCommentId: yup.string().required('FIELD_REQUIRED'),
 });

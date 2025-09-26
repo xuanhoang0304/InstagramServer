@@ -1,5 +1,5 @@
 import { BaseFilters } from '../../../../utils/baseRepository';
-import { EAuthProvider } from '../model/user.model';
+import { EAuthProvider, EUserGender } from '../model/user.model';
 
 export interface RegisterUserDTO {
   name: string;
@@ -15,9 +15,12 @@ export interface RegisterSocialUserDTO {
 }
 export interface UpdateUserDTO {
   name?: string;
-  age?: number;
+  bio?: string;
+  gender?: EUserGender;
   email?: string;
   password?: string;
+  isReal?: boolean;
+  avatar?: string;
 }
 
 export interface UserFilters extends BaseFilters {

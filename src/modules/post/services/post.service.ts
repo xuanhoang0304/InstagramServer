@@ -5,7 +5,6 @@ import { AppError } from '~/utils/app-error';
 import { BaseFilters, BaseRepository } from '~/utils/baseRepository';
 
 import { CreatePostDTO, PostFilters, UpdatePostDTO } from '../dtos/post.dto';
-import { CommentModel } from '../model/coment.model';
 import { IPost, PostModel } from '../model/post.model';
 import { CommentRepository } from '../repositories/comment.repository';
 import { PostRepository } from '../repositories/post.repository';
@@ -50,6 +49,7 @@ export class PostService {
     if (!following.length) {
       return {
         result: [],
+        total: 0,
       };
     }
     const result = await this.getPagination({ ...filters, createdBy: following });
@@ -120,7 +120,7 @@ export class PostService {
       },
     );
     // xóa tất cả record comment của postId đó
-    CommentModel.deleteMany({ post: oldPost._id });
+    CommentRepository.deleteAllCommentPost(postId);
     //  xóa media của bài post trên Cloudinary
     Promise.all(oldPost.media.map((item) => UploadService.deleteFileByPath(item.path, item.type)));
     //  xóa bài post
