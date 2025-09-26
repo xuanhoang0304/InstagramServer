@@ -1,4 +1,3 @@
-import * as cookie from 'cookie';
 // server/WebSocketServer.ts
 import { Server as HttpServer } from 'http';
 import jwt from 'jsonwebtoken';
@@ -52,35 +51,22 @@ class WebSocketServer {
       transports: ['websocket'],
     });
     this.io.use((socket, next) => {
-      const cookieHeader = socket.handshake.headers.cookie;
-
-      let refreshToken = null;
-
-      if (cookieHeader) {
-        const cookies = cookie.parse(cookieHeader);
-        refreshToken = cookies.refreshToken;
-      }
-
-      if (refreshToken) {
+      const token = socket.handshake.auth.token;
+      if (token) {
         try {
-          const decoded = jwt.verify(refreshToken, ConfignEnv.JWT_SECRET) as { id: string };
-          socket.handshake.auth.userId = decoded.id || '';
-
-          next();
-        } catch (error: any) {
-          logger.error('Invalid token:', error.message);
+          const decoded = jwt.verify(token, ConfignEnv.JWT_SECRET) as { id: string };
+          socket.handshake.auth.userId = decoded.id;
+        } catch (err) {
           socket.handshake.auth.userId = '';
-          next();
         }
-      } else {
-        socket.handshake.auth.userId = socket.handshake.auth.userId || '';
-        next();
       }
+      next();
     });
     this.io.on('connection', async (socket: Socket) => {
       const userId = socket.handshake.auth.userId || '';
       logger.info(`Client connected: ${socket.id} with userId ${userId}`);
       if (userId) {
+        logger.info('userId', userId);
         const groups = await GroupService.getGroups({ userId });
         const groupsChat = groups.result.map((group) => String(group._id));
         if (groupsChat.length) {
@@ -89,6 +75,7 @@ class WebSocketServer {
           });
         }
         onlineUsers.set(userId, { socketId: socket.id, userId, groupsChat, curRoom: '' });
+        logger.info('onlineUsers', onlineUsers);
       }
 
       // Chat
@@ -141,11 +128,13 @@ class WebSocketServer {
           return;
         }
         const membersOnline = group.members.filter((member) => onlineUsers.get(String(member._id)));
-
+        logger.info('membersOnline', membersOnline);
         membersOnline.forEach((member) => {
           callingUsers.set(String(member._id), String(group._id));
           const socketId = onlineUsers.get(String(member._id))?.socketId;
+          logger.info('socketId', socketId);
           if (socketId) {
+            logger.info(`first`);
             this.io?.to(socketId).emit('init-call', { sender, group, membersOnline });
           }
         });
@@ -215,115 +204,6 @@ class WebSocketServer {
       socket.on('error-leave', (data: { groupId: string; uId: string }) => {
         this.sendToRoom(data.groupId, 'error-leave', data);
       });
-      // socket.on('calling', ({ user, group }) => {
-      //   const freeUsers: string[] = group.members
-      //     .filter((member: { _id: string }) => !userCalling.includes(member._id as string))
-      //     .map((item: { _id: string }) => item._id);
-      //   console.log('freeUsers', freeUsers);
-      //   freeUsers.forEach((id) => {
-      //     const socketId = onlineUsers.find((u) => u.userId === id)?.socketId;
-      //     if (socketId) {
-      //       this.io?.to(socketId).emit('calling', { user, group });
-      //     }
-      //   });
-      // });
-      // socket.on('join-room', (data: UserInRoom) => {
-      //   userCalling.push(data.userId);
-      //   const newOnl = onlineUsers.map((u) =>
-      //     u.userId === data.userId ? { ...u, curRoom: data.group._id } : u,
-      //   );
-      //   onlineUsers = newOnl;
-      //   const existedUser = userRoom.find((u) => u.roomId === data.group._id);
-      //   if (existedUser) {
-      //     const newData = { ...data, order: existedUser.users.length + 1 };
-      //     const newUsers = existedUser.users.push(newData);
-      //     userRoom.map((user) => (user.roomId === data.group._id ? newUsers : user));
-      //     const result = userRoom.find((item) => item.roomId === data.group._id)?.users;
-      //     if (result?.length) {
-      //       this.sendToRoom(data.group._id, 'user-in-room', { result, group: data.group._id });
-      //     }
-      //     return;
-      //   }
-      //   const newUserRoom: UserRoom = {
-      //     roomId: data.group._id,
-      //     users: [{ ...data, order: 1 }],
-      //   };
-      //   userRoom.push(newUserRoom);
-      //   const result = userRoom.find((item) => item.roomId === data.group._id)?.users;
-      //   if (result?.length) {
-      //     this.sendToRoom(data.group._id, 'user-in-room', { result, group: data.group._id });
-      //   }
-      // });
-      // socket.on(
-      //   'mediaStatusUpdate',
-      //   (data: { uId: string; hasCamera: boolean; hasMic: boolean; groupId: string }) => {
-      //     const { groupId, uId, hasCamera, hasMic } = data;
-      //     this.sendToRoom(groupId, 'mediaStatusUpdate', { uId, hasCamera, hasMic });
-      //   },
-      // );
-      // socket.on(
-      //   'offer',
-      //   (data: {
-      //     groupId: string;
-      //     signal: any;
-      //     sender: string;
-      //     receiver: string;
-      //     other: boolean;
-      //   }) => {
-      //     const { receiver, signal, sender, other } = data;
-
-      //     const socketReceiver = onlineUsers.find((u) => u.userId === receiver);
-      //     if (socketReceiver && !userCalling.includes(socketReceiver.userId)) {
-      //       socket.to(socketReceiver.socketId).emit('offer', { sender, signal, other });
-      //     }
-      //   },
-      // );
-      // socket.on(
-      //   'answer',
-      //   (data: { groupId: string; sender: string; signal: any; receiver: string }) => {
-      //     const { sender, signal, receiver } = data;
-      //     const socketReceiver = onlineUsers.find((u) => u.userId === receiver);
-      //     if (socketReceiver) {
-      //       socket.to(socketReceiver.socketId).emit('answer', { sender, signal });
-      //     }
-      //   },
-      // );
-      // socket.on('user-leave', (data: { groupId: string; uId: string }) => {
-      //   userCalling.splice(userCalling.indexOf(data.uId), 1);
-      //   const newUserRoom = userRoom.map((item) =>
-      //     item.roomId === data.groupId
-      //       ? { ...item, users: item.users.filter((u) => u.userId !== data.uId) }
-      //       : item,
-      //   );
-      //   userRoom = newUserRoom;
-
-      //   const userInRoom = userRoom.find((i) => i.roomId === data.groupId)?.users;
-      //   this.sendToRoom(data.groupId, 'user-in-room', { result: userInRoom, group: data.groupId });
-      //   this.sendToRoom(data.groupId, 'user-leave', data);
-      // });
-      // socket.on('disconnect', () => {
-      //   logger.info(`Client disconnected: ${socket.id}`);
-      //   const userDisconnected = onlineUsers.find((u) => u.socketId === socket.id);
-      //   if (userDisconnected) {
-      //     onlineUsers.splice(onlineUsers.indexOf(userDisconnected), 1);
-      //     userCalling.splice(userCalling.indexOf(userDisconnected.userId), 1);
-      //     const userLeave = userRoom.find((u) => u.roomId === userDisconnected.curRoom);
-      //     if (userLeave) {
-      //       const userInRoom = userLeave.users.filter((u) => u.userId !== userDisconnected.userId);
-      //       userRoom = userRoom.map((u) =>
-      //         u.roomId === userDisconnected.curRoom ? { ...u, users: userInRoom } : u,
-      //       );
-      //       this.sendToRoom(userLeave.roomId, 'user-in-room', {
-      //         result: userInRoom,
-      //         group: userLeave.roomId,
-      //       });
-      //       this.sendToRoom(userLeave.roomId, 'user-leave', {
-      //         groupId: userLeave.roomId,
-      //         uId: userDisconnected.userId,
-      //       });
-      //     }
-      //   }
-      // });
       socket.on('disconnect', () => {
         logger.info(`Client disconnected: ${socket.id}`);
         for (const [uId, userInfo] of onlineUsers) {
