@@ -22,7 +22,7 @@ export class MessageRepository {
         .sort(sort)
         .limit(paginate.limit)
         .skip(paginate.skip)
-        .populate('sender', 'username email name avatar isReal')
+        .populate('sender', 'email name avatar isReal')
         .populate('parentMessage', 'text images videos sender parentMessage'),
       MessageModel.find(conditions).countDocuments(),
     ]);
@@ -31,7 +31,18 @@ export class MessageRepository {
       totalResult,
     };
   }
-  static async CreateMessage(data: CreateMessage, curUserId: string) {
+  static async getMessageById(msgId: string) {
+    const result = await MessageModel.findById(msgId).populate(
+      'sender',
+      'email name avatar isReal',
+    );
+    return result;
+  }
+  static async getMessageByGroupId(groupId: string) {
+    const result = await MessageModel.find({ groupId });
+    return result;
+  }
+  static async createMessage(data: CreateMessage, curUserId: string) {
     const message = (
       await MessageModel.create({
         ...data,
@@ -41,11 +52,11 @@ export class MessageRepository {
     ).toObject();
 
     const result = await MessageModel.findById(message._id)
-      .populate('sender', 'username email name avatar isReal')
+      .populate('sender', 'email name avatar isReal')
       .populate({
         path: 'parentMessage',
         select: 'text images videos sender createdAt',
-        populate: { path: 'sender', select: 'username email name avatar isReal' },
+        populate: { path: 'sender', select: 'email name avatar isReal' },
       });
 
     return result;

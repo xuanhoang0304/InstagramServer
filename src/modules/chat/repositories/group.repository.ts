@@ -28,9 +28,15 @@ export class GroupRepository {
     const [result, totalResult] = await Promise.all([
       GroupChatModel.find(condition)
         .sort(sort)
-        .populate('members', 'username email name avatar isReal')
-        .populate('createdBy', 'username email name avatar isReal')
-        .populate('lastMessage', 'createdAt')
+        .populate('members', 'email name avatar isReal')
+        .populate('createdBy', 'email name avatar isReal')
+        .populate({
+          path: 'lastMessage',
+          populate: {
+            path: 'sender',
+            select: 'email name avatar isReal',
+          },
+        })
         .skip(paginate.skip)
         .limit(paginate.limit)
         .lean(),
@@ -43,9 +49,9 @@ export class GroupRepository {
   }
   static async getById(id: string) {
     const result = await GroupChatModel.findById(new Types.ObjectId(id))
-      .populate('members', 'username email name avatar isReal name_normailized')
-      .populate('groupAdmin', 'username email name avatar isReal name_normailized')
-      .populate('createdBy', 'username email name avatar isReal')
+      .populate('members', 'email name avatar isReal name_normailized')
+      .populate('groupAdmin', 'email name avatar isReal name_normailized')
+      .populate('createdBy', 'email name avatar isReal')
       .lean();
     return result;
   }

@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import pkg from 'lodash';
 import { UserService } from '~/modules/account/user/services/user.service';
+import { MessageService } from '~/modules/chat/services/message.services';
 import { AppError } from '~/utils/app-error';
 import { BaseRepository } from '~/utils/baseRepository';
 
@@ -201,7 +202,10 @@ export class GroupService {
     return result;
   }
   static async deleteGroup(curUserId: string, groupId: string) {
-    const group = await BaseRepository.getById(GroupChatModel, groupId);
+    const [group, messages] = await Promise.all([
+      BaseRepository.getById(GroupChatModel, groupId),
+      MessageService.getMessageByGroupId(groupId),
+    ]);
     if (!group) {
       throw new AppError({
         id: 'GroupService.deleteGroup',
@@ -209,22 +213,28 @@ export class GroupService {
         message: 'Group chat is not existed',
       });
     }
-    if (!group.isGroup) {
-      throw new AppError({
-        id: 'GroupService.deleteGroup',
-        statusCode: StatusCodes.BAD_REQUEST,
-        message: 'This is not a group chat',
-      });
-    }
-    if (curUserId !== String(group.createdBy)) {
-      throw new AppError({
-        id: 'GroupService.deleteGroup',
-        statusCode: StatusCodes.BAD_REQUEST,
-        message: 'You are not owner group',
-      });
-    }
+    // if (!group.isGroup) {
+    //   throw new AppError({
+    //     id: 'GroupService.deleteGroup',
+    //     statusCode: StatusCodes.BAD_REQUEST,
+    //     message: 'This is not a group chat',
+    //   });
+    // }
+    // if (curUserId !== String(group.createdBy)) {
+    //   throw new AppError({
+    //     id: 'GroupService.deleteGroup',
+    //     statusCode: StatusCodes.BAD_REQUEST,
+    //     message: 'You are not owner group',
+    //   });
+    // }
     // Delete Many những Message có id = groupId
     // ......
+
+    const promises = messages.map((message) =>
+      MessageService.deleteMessage(String(message._id), curUserId, 'delete-group'),
+    );
+    Promise.all(promises);
+
     // Delete group
     const result = await GroupRepository.deleteGroup(groupId);
     return result;

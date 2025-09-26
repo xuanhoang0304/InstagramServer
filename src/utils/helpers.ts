@@ -1,3 +1,4 @@
+import { onlineUsers } from '~/config/ws';
 import { CustomCookies } from '~/types/types';
 
 export const tryParseJson = (str: any) => {
@@ -36,4 +37,7 @@ export function tryParseCookie(cookieHeader: string): CustomCookies {
     cookies[key as keyof CustomCookies] = value;
   });
   return cookies;
+}
+export function getSocketId(userId: string) {
+  return onlineUsers.get(userId)?.socketId;
 }

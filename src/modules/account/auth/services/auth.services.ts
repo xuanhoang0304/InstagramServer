@@ -152,8 +152,11 @@ export class AuthServices {
       const accessToken = this.signJWT(existedgUser, '15m');
       return accessToken;
     } catch (error: any) {
-      res.clearCookie('refreshToken');
-      throw new Error(error.message);
+      throw new AppError({
+        id: 'AuthService.RefreshToken',
+        message: error.message,
+        statusCode: StatusCodes.BAD_REQUEST,
+      });
     }
   }
 

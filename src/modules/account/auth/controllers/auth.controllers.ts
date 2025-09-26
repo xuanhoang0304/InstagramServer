@@ -10,15 +10,12 @@ import { AuthServices } from '../services/auth.services';
 
 export class AuthControllers {
   async getMe(req: Request, res: Response) {
-    const { accessToken, refreshToken } = req.cookies;
-    const decoded = jwt.verify(
-      String(refreshToken) || String(accessToken),
-      ConfignEnv.JWT_SECRET,
-    ) as JwtPayload & {
+    const accessToken = req.headers?.authorization?.split(' ')[1];
+    const decoded = jwt.verify(String(accessToken), ConfignEnv.JWT_SECRET) as JwtPayload & {
       id: string;
     };
     const user = await UserService.getById(decoded.id);
-    res.status(StatusCodes.OK).json(HttpResponse.Paginate({ user, accessToken, refreshToken }));
+    res.status(StatusCodes.OK).json(HttpResponse.Paginate({ user }));
   }
   async Login(req: Request, res: Response) {
     const data: LoginDTO = req.body;
@@ -43,18 +40,8 @@ export class AuthControllers {
     });
   }
   async RefreshToken(req: Request, res: Response) {
-    const refreshToken = req?.cookies.refreshToken;
+    const refreshToken = req.headers?.authorization?.split(' ')[1];
     const result = await AuthServices.RefreshToken(refreshToken as string, res);
-    if (result) {
-      res.cookie('accessToken', result, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        maxAge: 15 * 60 * 1000,
-        path: '/',
-      });
-    }
-
     res.status(200).json({
       code: 200,
       message: 'Token refreshed successfully',
@@ -69,33 +56,6 @@ export class AuthControllers {
   async Logout(req: Request, res: Response) {
     res.clearCookie('refreshToken');
     res.clearCookie('accessToken');
-    // const refreshToken = req.cookies.refreshToken;
-    // const result = await AuthServices.Logout(String(refreshToken));
-    // const cookies: string[] = [];
-
-    // if (result.refreshToken === '') {
-    //   cookies.push(
-    //     cookie.serialize('refreshToken', String(result.refreshToken), {
-    //       secure: true,
-    //       sameSite: 'none',
-    //       expires: new Date(0),
-    //       path: '/',
-    //     }),
-    //   );
-    // }
-    // if (result.accessToken === '') {
-    //   cookies.push(
-    //     cookie.serialize('accessToken', String(result.accessToken), {
-    //       secure: true,
-    //       sameSite: 'none',
-    //       expires: new Date(0),
-    //       path: '/',
-    //     }),
-    //   );
-    // }
-    // if (cookies.length > 0) {
-    //   res.setHeader('Set-Cookie', cookies);
-    // }
     res
       .status(StatusCodes.OK)
       .json(HttpResponse.Paginate({ code: 200, message: 'Logout success' }));

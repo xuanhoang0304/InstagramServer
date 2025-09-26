@@ -26,16 +26,17 @@ AuthRoutes.get('/google', passport.authenticate('google', { scope: ['profile', '
 AuthRoutes.get(
   '/google/callback',
   passport.authenticate('google', { session: false }),
-  (req, res) => {
+  (req: any, res) => {
     const user = req.user as IUser;
     const accessToken = AuthServices.signJWT(user, '15m');
     const refreshToken = AuthServices.signJWT(user, '7d');
+
     res.redirect(
       `${
         process.env.NODE_ENV === 'production'
           ? String(ConfignEnv.FRONTEND_URL)
           : 'http://localhost:3000'
-      }/auth/google-callback?accessToken=${accessToken}&refreshToken=${refreshToken}`,
+      }/auth/google-callback?accessToken=${accessToken}&refreshToken=${refreshToken}${req.temp && `&newUser=${req.temp._id}`}`,
     );
   },
 );

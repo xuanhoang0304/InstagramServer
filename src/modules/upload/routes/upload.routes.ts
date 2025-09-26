@@ -21,7 +21,7 @@ router.post(
   asyncHandler(UploadController.uploadImage),
 );
 
-router.delete(
+router.put(
   '/by-paths',
   passport.authenticate('jwt', { session: false }),
   validate(removeFileSchema2),

@@ -30,8 +30,8 @@ export class CommentController {
   async createReply(req: Request, res: Response) {
     const user = req.user as IUser;
     const createdBy = String(user._id);
-    const commentId = req.params.commentId;
-    const data = { ...req.body, createdBy, commentId } as CreateReplyCommentDTO;
+    const parentCommentId = req.params.commentId;
+    const data = { ...req.body, createdBy, parentCommentId } as CreateReplyCommentDTO;
     const result = await CommentService.createReply(data);
     res.status(StatusCodes.CREATED).json(HttpResponse.created(result));
   }
