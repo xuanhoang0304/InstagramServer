@@ -1,3 +1,4 @@
+import { IUser } from '~/modules/account/user/model/user.model';
 import { BaseFilters, BaseRepository } from '~/utils/baseRepository';
 
 import { CreateCommentDTO, CreateReplyCommentDTO } from '../dtos/comment.dto';
@@ -25,7 +26,15 @@ export class CommentRepository {
         .sort(sort)
         .skip(paginate.skip)
         .limit(paginate.limit)
-        .populate('createdBy', '_id name avatar website bio followers followings saved isReal'),
+        .populate('createdBy', '_id name avatar website bio followers followings saved isReal')
+        .populate({
+          path: 'replyCommentId',
+          select: '_id createdBy',
+          populate: {
+            path: 'createdBy',
+            select: '_id name avatar  isReal',
+          },
+        }),
       CommentModel.findById(parentId),
     ]);
     const totalReplies = total?.replies.length;
@@ -42,10 +51,24 @@ export class CommentRepository {
   }
   static async create(data: CreateCommentDTO) {
     const newCmt = await CommentModel.create({ ...data, post: data.postId, parentCommentId: null });
-    const result = newCmt.populate(
-      'createdBy',
-      '_id name avatar website bio followers followings saved isReal',
-    );
+    const result = await newCmt.populate<{
+      createdBy: Pick<
+        IUser,
+        | '_id'
+        | 'name'
+        | 'avatar'
+        | 'website'
+        | 'bio'
+        | 'followers'
+        | 'followings'
+        | 'saved'
+        | 'isReal'
+      >;
+    }>({
+      path: 'createdBy',
+      select: '_id name avatar website bio followers followings saved isReal',
+    });
+
     return result;
   }
   static async createReply(data: CreateReplyCommentDTO) {
@@ -53,11 +76,35 @@ export class CommentRepository {
       ...data,
       post: data.postId,
       parentCommentId: data.parentCommentId,
+      replyCommentId: data.replyCommentId,
     });
-    const result = newCmt.populate(
-      'createdBy',
-      '_id name avatar website bio followers followings saved isReal',
-    );
+    const result = await newCmt.populate<{
+      createdBy: Pick<
+        IUser,
+        | '_id'
+        | 'name'
+        | 'avatar'
+        | 'website'
+        | 'bio'
+        | 'followers'
+        | 'followings'
+        | 'saved'
+        | 'isReal'
+      >;
+    }>([
+      {
+        path: 'createdBy',
+        select: '_id name avatar website bio followers followings saved isReal',
+      },
+      {
+        path: 'replyCommentId',
+        select: '_id createdBy',
+        populate: {
+          path: 'createdBy',
+          select: '_id name avatar  isReal',
+        },
+      },
+    ]);
 
     return result;
   }

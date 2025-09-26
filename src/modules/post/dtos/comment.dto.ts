@@ -8,7 +8,7 @@ export interface CreateReplyCommentDTO {
   createdBy: string;
   content: string;
   postId: string;
-  commentId: string;
+  replyCommentId: string;
   parentCommentId: string;
 }
 

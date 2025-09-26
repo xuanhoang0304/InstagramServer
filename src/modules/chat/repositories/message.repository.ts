@@ -31,7 +31,14 @@ export class MessageRepository {
       totalResult,
     };
   }
-  static async CreateMessage(data: CreateMessage, curUserId: string) {
+  static async getMessageById(msgId: string) {
+    const result = await MessageModel.findById(msgId).populate(
+      'sender',
+      'username email name avatar isReal',
+    );
+    return result;
+  }
+  static async createMessage(data: CreateMessage, curUserId: string) {
     const message = (
       await MessageModel.create({
         ...data,

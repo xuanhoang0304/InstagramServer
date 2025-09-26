@@ -24,11 +24,18 @@ messageRoutes.get(
   }),
   asyncHandler(messageController.getPagination),
 );
+messageRoutes.get(
+  '/:msgId',
+  passport.authenticate('jwt', {
+    session: false,
+  }),
+  asyncHandler(messageController.getMessageById),
+);
 messageRoutes.delete(
   '/:msgId',
   passport.authenticate('jwt', {
     session: false,
   }),
-  asyncHandler(messageController.DeleteMessage),
+  asyncHandler(messageController.deleteMessage),
 );
 export default messageRoutes;

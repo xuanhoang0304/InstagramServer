@@ -1,12 +1,19 @@
 import { StatusCodes } from 'http-status-codes';
+import { Types } from 'mongoose';
+import { wsServer } from '~/app';
+import { CreateNotify } from '~/modules/notify/dtos/notify.dtos';
+import { ENotifyType, ETargetType } from '~/modules/notify/model/notify.model';
+import { NotifyService } from '~/modules/notify/services/notify.service';
 import { AppError } from '~/utils/app-error';
 import { BaseFilters, BaseRepository } from '~/utils/baseRepository';
+import { getSocketId } from '~/utils/helpers';
 
 import { CreateCommentDTO, CreateReplyCommentDTO, UpdateCommentDTO } from '../dtos/comment.dto';
 import { CommentModel } from '../model/coment.model';
 import { PostModel } from '../model/post.model';
 import { CommentRepository } from '../repositories/comment.repository';
 import { PostRepository } from '../repositories/post.repository';
+import { PostService } from './post.service';
 
 export class CommentService {
   static async getReplies(parentCommentId: string, filters: BaseFilters) {
@@ -28,6 +35,31 @@ export class CommentService {
     }
     const result = await CommentRepository.create(data);
     PostRepository.commentPost(data.postId, String(result?._id));
+    if (String(result.createdBy._id) !== String(post.createdBy)) {
+      const socketId = getSocketId(String(post.createdBy));
+      if (socketId && data.createdBy !== String(post.createdBy)) {
+        wsServer.sendToSocket(socketId, 'notify', {
+          type: 'comment-post',
+          data: {
+            sender: result.createdBy,
+            message: `${result.createdBy.name} đã bình luận bài post của bạn : ${result.content}`,
+            post,
+          },
+        });
+      }
+      const notifyData: CreateNotify = {
+        sender: data.createdBy,
+        recipient: String(post.createdBy),
+        content: `${result.createdBy.name} đã bình luận bài post của bạn : ${result.content}`,
+        type: ENotifyType.commentPost,
+        target: {
+          type: ETargetType.Comment,
+          target_id: new Types.ObjectId(result._id as string),
+        },
+      };
+      NotifyService.createNotify(notifyData);
+    }
+
     return result;
   }
   static async update(commentId: string, data: UpdateCommentDTO, createdBy: string) {
@@ -63,9 +95,10 @@ export class CommentService {
     return result;
   }
   static async createReply(data: CreateReplyCommentDTO) {
-    const [post, parentCmt] = await Promise.all([
-      BaseRepository.getByField(PostModel, '_id', data.postId),
-      BaseRepository.getByField(CommentModel, '_id', data.commentId),
+    const [post, parentCmt, replyComment] = await Promise.all([
+      PostService.getPostByPostId(data.postId),
+      BaseRepository.getByField(CommentModel, '_id', data.parentCommentId),
+      BaseRepository.getByField(CommentModel, '_id', data.replyCommentId),
     ]);
     if (!post) {
       throw new AppError({
@@ -76,7 +109,7 @@ export class CommentService {
     }
 
     const postComment = post.comments.map((id) => String(id));
-    if (!parentCmt || !postComment.includes(data.commentId)) {
+    if (!parentCmt || !replyComment || !postComment.includes(data.parentCommentId)) {
       throw new AppError({
         id: 'CommentService.createReply.err',
         message: 'Comment không tồn tại hoặc không phải trong bài post này',
@@ -86,9 +119,35 @@ export class CommentService {
     const result = await CommentRepository.createReply({
       ...data,
       parentCommentId: String(parentCmt._id),
+      replyCommentId: data.replyCommentId,
     });
     PostRepository.commentPost(data.postId, String(result?._id));
     CommentRepository.addCmtToReplies(String(parentCmt._id), String(result?._id));
+
+    if (String(result.createdBy._id) !== String(replyComment.createdBy)) {
+      const socketId = getSocketId(String(replyComment.createdBy));
+      if (socketId) {
+        wsServer.sendToSocket(socketId, 'notify', {
+          type: 'comment-post',
+          data: {
+            sender: result.createdBy,
+            message: `${result.createdBy.name} đã trả lời bình luận của bạn  : ${result.content}`,
+            post,
+          },
+        });
+      }
+    }
+    const notifyData: CreateNotify = {
+      sender: data.createdBy,
+      recipient: String(replyComment.createdBy),
+      content: `${result.createdBy.name} đã trả lời bình luận của bạn  : ${result.content}`,
+      type: ENotifyType.replyComment,
+      target: {
+        type: ETargetType.Comment,
+        target_id: new Types.ObjectId(result._id as string),
+      },
+    };
+    NotifyService.createNotify(notifyData);
     return result;
   }
 }
